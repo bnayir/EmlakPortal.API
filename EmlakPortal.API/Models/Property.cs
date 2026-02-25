@@ -1,5 +1,4 @@
-﻿using EmlakPortal.API.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EmlakPortal.Api.Models
 {
@@ -28,5 +27,11 @@ namespace EmlakPortal.Api.Models
 
         public int CategoryId { get; set; }
         public Category Category { get; set; }
+        public bool IsCommon { get; set; }
+        public string PropertyType { get; set; }
+        public string FloorsCount { get; set; }
+        public string FloorLocation { get; set; }
+        public string Heating {  get; set; }
+        public bool IsActive { get; set; }
     }
 }
