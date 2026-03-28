@@ -1,7 +1,9 @@
 ﻿using EmlakPortal.API.Models;
 using EmlakPortal.API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static EmlakPortal.API.Models.Property;
 
 namespace EmlakPortal.API.Controllers
 {
@@ -31,11 +33,18 @@ namespace EmlakPortal.API.Controllers
             return Ok(property);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostProperty(Property property)
         {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            property.AppUserId = userId; 
+
             await _repository.AddAsync(property);
-            return CreatedAtAction(nameof(GetProperty), new { id = property.PropertyId }, property);
+            return Ok("İlan başarıyla eklendi.");
         }
 
         [HttpDelete("{id}")]
@@ -43,6 +52,36 @@ namespace EmlakPortal.API.Controllers
         {
             await _repository.DeleteAsync(id);
             return Ok("İlan başarıyla silindi.");
+        }
+
+        [Authorize]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProperty(int id, Property property)
+        {
+            if (id != property.PropertyId)
+            {
+                return BadRequest("Girilen ID ile ilan ID'si uyuşmuyor.");
+            }
+
+            await _repository.UpdateAsync(property);
+            return Ok("İlan başarıyla güncellendi.");
+        }
+
+        [Authorize]
+        [HttpGet("MyProperties")]
+        [HttpGet]
+        public async Task<IActionResult> GetMyProperties()
+        {
+
+            var properties = await _repository.GetAllWithDetailsAsync();
+
+            var approvedList = properties.Where(p => p.Status == PropertyStatus.Approved).Select(p => new {
+                p.PropertyId,
+                p.Title,
+                StatusName = p.Status.ToString()
+            });
+
+            return Ok(approvedList);
         }
     }
 }

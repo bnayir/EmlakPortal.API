@@ -4,6 +4,7 @@ using EmlakPortal.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmlakPortal.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260328192221_AddCityTable")]
+    partial class AddCityTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,28 +24,6 @@ namespace EmlakPortal.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("District", b =>
-                {
-                    b.Property<int>("DistrictId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DistrictId"));
-
-                    b.Property<int>("CityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DistrictName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("DistrictId");
-
-                    b.HasIndex("CityId");
-
-                    b.ToTable("District");
-                });
 
             modelBuilder.Entity("EmlakPortal.API.Models.AppRole", b =>
                 {
@@ -203,9 +184,6 @@ namespace EmlakPortal.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DistrictId")
-                        .HasColumnType("int");
-
                     b.Property<string>("FloorLocation")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -257,8 +235,6 @@ namespace EmlakPortal.API.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("CityId");
-
-                    b.HasIndex("DistrictId");
 
                     b.ToTable("Properties");
                 });
@@ -369,23 +345,12 @@ namespace EmlakPortal.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("District", b =>
-                {
-                    b.HasOne("EmlakPortal.API.Models.City", "City")
-                        .WithMany("Districts")
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("City");
-                });
-
             modelBuilder.Entity("EmlakPortal.API.Models.Property", b =>
                 {
                     b.HasOne("EmlakPortal.API.Models.AppUser", "AppUser")
-                        .WithMany("Properties")
+                        .WithMany()
                         .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EmlakPortal.API.Models.Category", "Category")
@@ -397,13 +362,7 @@ namespace EmlakPortal.API.Migrations
                     b.HasOne("EmlakPortal.API.Models.City", "City")
                         .WithMany("Properties")
                         .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("District", "District")
-                        .WithMany("Properties")
-                        .HasForeignKey("DistrictId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AppUser");
@@ -411,8 +370,6 @@ namespace EmlakPortal.API.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("City");
-
-                    b.Navigation("District");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -466,16 +423,6 @@ namespace EmlakPortal.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("District", b =>
-                {
-                    b.Navigation("Properties");
-                });
-
-            modelBuilder.Entity("EmlakPortal.API.Models.AppUser", b =>
-                {
-                    b.Navigation("Properties");
-                });
-
             modelBuilder.Entity("EmlakPortal.API.Models.Category", b =>
                 {
                     b.Navigation("Properties");
@@ -483,8 +430,6 @@ namespace EmlakPortal.API.Migrations
 
             modelBuilder.Entity("EmlakPortal.API.Models.City", b =>
                 {
-                    b.Navigation("Districts");
-
                     b.Navigation("Properties");
                 });
 #pragma warning restore 612, 618

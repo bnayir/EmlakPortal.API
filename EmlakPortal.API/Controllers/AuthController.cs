@@ -43,6 +43,7 @@ namespace EmlakPortal.API.Controllers
             }
 
             return BadRequest(result.Errors);
+            await _userManager.AddToRoleAsync(user, "Admin");
         }
 
         [HttpPost("Login")]
