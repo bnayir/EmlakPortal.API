@@ -1,4 +1,5 @@
-﻿using EmlakPortal.API.Repositories;
+﻿using EmlakPortal.API.Models;
+using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

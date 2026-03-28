@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EmlakPortal.Api.Models
+namespace EmlakPortal.API.Models
 {
     public class Category
     {

@@ -1,4 +1,4 @@
-﻿using EmlakPortal.Api.Models;
+﻿using EmlakPortal.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

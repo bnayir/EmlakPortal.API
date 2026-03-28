@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-namespace EmlakPortal.Api.Models
+namespace EmlakPortal.API.Models
 {
     public class AppUser : IdentityUser
     {

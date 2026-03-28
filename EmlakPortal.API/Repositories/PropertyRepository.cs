@@ -1,5 +1,5 @@
 ﻿using EmlakPortal.API.Data;
-using EmlakPortal.Api.Models;
+using EmlakPortal.API.Models;
 
 namespace EmlakPortal.API.Repositories
 {
