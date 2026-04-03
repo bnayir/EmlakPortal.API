@@ -11,45 +11,45 @@ namespace EmlakPortal.API.Controllers
     [ApiController]
     public class AdminPropertiesController : ControllerBase
     {
-        
-    
-         
-        
-            private readonly PropertyRepository _repository;
 
-            public AdminPropertiesController(PropertyRepository repository)
-            {
-                _repository = repository;
-            }
 
-            // 1. Tüm ilanları (sahibi fark etmeksizin) detaylı listele
-            [HttpGet("all-list")]
-            public async Task<IActionResult> GetAllPropertiesForAdmin()
-            {
-                var properties = await _repository.GetAllWithDetailsAsync();
-                return Ok(properties);
-            }
 
-            // 2. Sistemsel bir ilanı zorla sil (Admin yetkisiyle)
-            [HttpDelete("force-delete/{id}")]
-            public async Task<IActionResult> ForceDelete(int id)
-            {
-                await _repository.DeleteAsync(id);
-                return Ok("İlan yönetici tarafından sistemden kaldırıldı.");
-            }
 
-            // 3. İstatistik Getir (Vize için çok havalı bir metot)
-            [HttpGet("stats")]
-            public async Task<IActionResult> GetStats()
+        private readonly PropertyRepository _repository;
+
+        public AdminPropertiesController(PropertyRepository repository)
+        {
+            _repository = repository;
+        }
+
+        // 1. Tüm ilanları (sahibi fark etmeksizin) detaylı listele
+        [HttpGet("all-list")]
+        public async Task<IActionResult> GetAllPropertiesForAdmin()
+        {
+            var properties = await _repository.GetAllWithDetailsAsync();
+            return Ok(properties);
+        }
+
+        // 2. Sistemsel bir ilanı zorla sil (Admin yetkisiyle)
+        [HttpDelete("force-delete/{id}")]
+        public async Task<IActionResult> ForceDelete(int id)
+        {
+            await _repository.DeleteAsync(id);
+            return Ok("İlan yönetici tarafından sistemden kaldırıldı.");
+        }
+
+        // 3. İstatistik Getir (Vize için çok havalı bir metot)
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStats()
+        {
+            var properties = await _repository.GetAllAsync();
+            return Ok(new
             {
-                var properties = await _repository.GetAllAsync();
-                return Ok(new
-                {
-                    TotalProperties = properties.Count,
-                    TotalPrice = properties.Sum(p => p.Price),
-                    LastUpdate = DateTime.Now
-                });
-            }
+                TotalProperties = properties.Count,
+                TotalPrice = properties.Sum(p => p.Price),
+                LastUpdate = DateTime.Now
+            });
+        }
         // 1. Onay bekleyen tüm ilanları getir
         [HttpGet("pending-list")]
         public async Task<IActionResult> GetPendingProperties()
@@ -82,6 +82,6 @@ namespace EmlakPortal.API.Controllers
             return Ok($"{id} numaralı ilan reddedildi.");
         }
     }
-    }
+}
 
 

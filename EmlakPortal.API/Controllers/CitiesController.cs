@@ -1,7 +1,9 @@
-﻿using EmlakPortal.API.Models;
+﻿using EmlakPortal.API.DTOs;
+using EmlakPortal.API.Models;
 using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static EmlakPortal.API.DTOs.CreateDTO;
 
 namespace EmlakPortal.API.Controllers
 {
@@ -33,10 +35,15 @@ namespace EmlakPortal.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> PostCity(City city)
+        public async Task<IActionResult> PostCity(CityCreateDto dto)
         {
+            var city = new City
+            {
+                CityName = dto.CityName
+            };
+
             await _repository.AddAsync(city);
-            return CreatedAtAction(nameof(GetCity), new { id = city.CityId }, city);
+            return Ok("Şehir başarıyla eklendi.");
         }
 
         [Authorize(Roles = "Admin")]

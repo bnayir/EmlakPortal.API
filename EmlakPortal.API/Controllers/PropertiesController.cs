@@ -1,8 +1,9 @@
-﻿using EmlakPortal.API.Models;
+﻿using EmlakPortal.API.DTOs; // DTO klasörün
+using EmlakPortal.API.Models;
 using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static EmlakPortal.API.DTOs.CreateDTO;
 using static EmlakPortal.API.Models.Property;
 
 namespace EmlakPortal.API.Controllers
@@ -22,7 +23,13 @@ namespace EmlakPortal.API.Controllers
         public async Task<IActionResult> GetProperties()
         {
             var properties = await _repository.GetAllAsync();
-            return Ok(properties);
+            var result = properties.Select(p => new {
+                p.PropertyId,
+                p.Title,
+                p.Price,
+                p.Description
+            }).ToList();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
@@ -35,14 +42,20 @@ namespace EmlakPortal.API.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> PostProperty(Property property)
+        public async Task<IActionResult> PostProperty(PropertyCreateDto dto)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            property.AppUserId = userId; 
+            var property = new Property
+            {
+                Title = dto.Title,
+                Price = dto.Price,
+                Description = dto.Description,
+                CategoryId = dto.CategoryId,
+                AppUserId = userId,
 
+            };
             await _repository.AddAsync(property);
             return Ok("İlan başarıyla eklendi.");
         }
@@ -58,24 +71,19 @@ namespace EmlakPortal.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProperty(int id, Property property)
         {
-            if (id != property.PropertyId)
-            {
-                return BadRequest("Girilen ID ile ilan ID'si uyuşmuyor.");
-            }
-
+            if (id != property.PropertyId) return BadRequest("ID uyuşmuyor.");
             await _repository.UpdateAsync(property);
             return Ok("İlan başarıyla güncellendi.");
         }
 
         [Authorize]
         [HttpGet("MyProperties")]
-        [HttpGet]
         public async Task<IActionResult> GetMyProperties()
         {
-
             var properties = await _repository.GetAllWithDetailsAsync();
 
-            var approvedList = properties.Where(p => p.Status == PropertyStatus.Approved).Select(p => new {
+            var approvedList = properties.Where(p => p.Status == PropertyStatus.Approved).Select(p => new
+            {
                 p.PropertyId,
                 p.Title,
                 StatusName = p.Status.ToString()
