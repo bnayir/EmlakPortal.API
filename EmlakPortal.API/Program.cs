@@ -27,7 +27,8 @@ builder.Services.AddIdentity<AppUser, AppRole>()
 
 builder.Services.AddScoped<GenericRepository<City>>();
 builder.Services.AddScoped<GenericRepository<District>>();
-
+builder.Services.AddScoped<GenericRepository<Favorite>>();
+builder.Services.AddScoped<GenericRepository<Message>>();
 builder.Services.AddScoped<GenericRepository<Category>>();
 builder.Services.AddScoped<GenericRepository<Property>>();
 

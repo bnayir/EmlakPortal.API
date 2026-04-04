@@ -3,7 +3,6 @@ using EmlakPortal.API.Models;
 using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static EmlakPortal.API.DTOs.CreateDTO;
 
 namespace EmlakPortal.API.Controllers
 {
@@ -35,7 +34,7 @@ namespace EmlakPortal.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> PostCity(CityCreateDto dto)
+        public async Task<IActionResult> PostCity(CityDto dto)
         {
             var city = new City
             {

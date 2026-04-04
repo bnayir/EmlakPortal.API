@@ -10,8 +10,12 @@ namespace EmlakPortal.API.Data
         public AppDbContext(DbContextOptions <AppDbContext> options) : base(options)
         { }
        
-            public DbSet<Property>Properties { get; set; }
-            public DbSet<Category>Categories { get; set; }
+        public DbSet<Property>Properties { get; set; }
+        public DbSet<Category>Categories { get; set; }
+        public DbSet<Favorite> Favorites { get; set; }
+
+        public DbSet<Message> Messages { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

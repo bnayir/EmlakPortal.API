@@ -3,7 +3,6 @@ using EmlakPortal.API.Models;
 using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using static EmlakPortal.API.DTOs.CreateDTO;
 using static EmlakPortal.API.Models.Property;
 
 namespace EmlakPortal.API.Controllers
@@ -42,7 +41,7 @@ namespace EmlakPortal.API.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> PostProperty(PropertyCreateDto dto)
+        public async Task<IActionResult> PostProperty(PropertyDto dto)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
@@ -60,12 +59,7 @@ namespace EmlakPortal.API.Controllers
             return Ok("İlan başarıyla eklendi.");
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProperty(int id)
-        {
-            await _repository.DeleteAsync(id);
-            return Ok("İlan başarıyla silindi.");
-        }
+        
 
         [Authorize]
         [HttpPut("{id}")]
@@ -90,6 +84,73 @@ namespace EmlakPortal.API.Controllers
             });
 
             return Ok(approvedList);
+        }
+
+        [HttpGet("Search")]
+        public async Task<IActionResult> SearchProperties([FromQuery] FilterDto filter)
+        {
+            var properties = await _repository.GetAllAsync();
+            var query = properties.AsQueryable();
+
+            if (!string.IsNullOrEmpty(filter.Keyword))
+            {
+                query = query.Where(p => p.Title.Contains(filter.Keyword)||
+                                          p.Description.Contains(filter.Keyword));
+            }
+
+            if (filter.CityId.HasValue)
+                query = query.Where(p => p.CityId == filter.CityId.Value);
+
+            if (filter.MinPrice.HasValue)
+                query = query.Where(p => p.Price == filter.MinPrice.Value);
+
+            if (filter.MaxPrice.HasValue)
+                query = query.Where(p => p.Price == filter.MaxPrice.Value);
+
+            if (!string.IsNullOrEmpty(filter.SortBy))
+            {
+                query = filter.SortBy.ToLower() switch
+                {
+                    "price_asc" => query.OrderBy(p => p.Price),
+                    "price_desc" => query.OrderByDescending(p => p.Price),
+                    "newest" => query.OrderByDescending(p => p.PropertyId),
+                    _ => query
+                };
+            }
+
+            var result = query.Select(p => new
+            {
+                p.PropertyId,
+                p.Title,
+                p.Price,
+                p.CityId,
+                p.CategoryId,
+            }).ToList();
+
+            if (!result.Any()) return NotFound("İlan Bulunamadı.");
+            return Ok(result);
+        }
+
+        [Authorize] 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProperty(int id)
+        {
+            var property = await _repository.GetByIdAsync(id);
+            if (property == null)
+            {
+                return NotFound("Böyle bir ilan bulunamadı.");
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (property.AppUserId != userId)
+            {
+                return Unauthorized("Sadece kendi ilanlarınızı silebilirsiniz!");
+            }
+
+            await _repository.DeleteAsync(id);
+
+            return Ok("İlan başarıyla silindi.");
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using EmlakPortal.API.DTOs;
-using EmlakPortal.API.Models; // Model klasörün burasıysa kalsın
+using EmlakPortal.API.Models; 
 using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
-using static EmlakPortal.API.DTOs.CreateDTO;
 
 namespace EmlakPortal.API.Controllers
 {
@@ -38,7 +37,7 @@ namespace EmlakPortal.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> PostDistrict(DistrictCreateDto dto)
+        public async Task<IActionResult> PostDistrict(DistrictDto dto)
         {
 var district=new District { DistrictName = dto.DistrictName, CityId=dto.CityId };
             await _repository.AddAsync(district);

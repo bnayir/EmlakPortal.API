@@ -22,7 +22,7 @@ namespace EmlakPortal.API.Controllers
             _repository = repository;
         }
 
-        // 1. Tüm ilanları (sahibi fark etmeksizin) detaylı listele
+        //  Tüm ilanları listele
         [HttpGet("all-list")]
         public async Task<IActionResult> GetAllPropertiesForAdmin()
         {
@@ -30,7 +30,7 @@ namespace EmlakPortal.API.Controllers
             return Ok(properties);
         }
 
-        // 2. Sistemsel bir ilanı zorla sil (Admin yetkisiyle)
+        // Sistemsel bir ilanı  sil (Admin yetkisiyle)
         [HttpDelete("force-delete/{id}")]
         public async Task<IActionResult> ForceDelete(int id)
         {
@@ -38,7 +38,7 @@ namespace EmlakPortal.API.Controllers
             return Ok("İlan yönetici tarafından sistemden kaldırıldı.");
         }
 
-        // 3. İstatistik Getir (Vize için çok havalı bir metot)
+        //  İstatistik Getir 
         [HttpGet("stats")]
         public async Task<IActionResult> GetStats()
         {
@@ -50,7 +50,7 @@ namespace EmlakPortal.API.Controllers
                 LastUpdate = DateTime.Now
             });
         }
-        // 1. Onay bekleyen tüm ilanları getir
+        //  Onay bekleyen tüm ilanları getir
         [HttpGet("pending-list")]
         public async Task<IActionResult> GetPendingProperties()
         {
@@ -58,7 +58,6 @@ namespace EmlakPortal.API.Controllers
             return Ok(properties.Where(p => p.Status == PropertyStatus.Pending));
         }
 
-        // 2. İlanı Onayla
         [HttpPost("approve/{id}")]
         public async Task<IActionResult> Approve(int id)
         {
@@ -70,7 +69,6 @@ namespace EmlakPortal.API.Controllers
             return Ok($"{id} numaralı ilan onaylandı ve yayına alındı.");
         }
 
-        // 3. İlanı Reddet
         [HttpPost("reject/{id}")]
         public async Task<IActionResult> Reject(int id)
         {
