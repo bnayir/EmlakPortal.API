@@ -152,5 +152,56 @@ namespace EmlakPortal.API.Controllers
 
             return Ok("İlan başarıyla silindi.");
         }
+
+        
+       
+
+        [Authorize]
+        [HttpPut]
+        public async Task<IActionResult> UpdateProperty(PropertyUpdateDto dto)
+        {
+            var property = await _repository.GetByIdAsync(dto.PropertyId);
+            if (property == null)
+                return NotFound("İlan bulunamadı.");
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (property.AppUserId != userId)
+                return Unauthorized("Sadece kendi ilanlarınızı güncelleyebilirsiniz!");
+
+            property.Title = dto.Title;
+            property.Description = dto.Description;
+            property.Price = dto.Price;
+            property.CategoryId = dto.CategoryId;
+            property.CityId = dto.CityId;
+
+            await _repository.UpdateAsync(property);
+
+            return Ok("İlan başarıyla güncellendi.");
+        }
+
+        [Authorize]
+        [HttpPost("UploadImage/{id}")]
+        public async Task<IActionResult> UploadImage(int id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Lütfen bir resim seçiniz.");
+
+            var property = await _repository.GetByIdAsync(id);
+            if (property == null) return NotFound("İlan bulunamadı.");
+
+            var extension = Path.GetExtension(file.FileName);
+            var newImageName = Guid.NewGuid() + extension;
+
+            var location = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/", newImageName);
+
+            using (var stream = new FileStream(location, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return Ok(new { Message = "Resim başarıyla yüklendi", ImageUrl = "/images/" + newImageName });
+        }
     }
-}
+
+       
+    }
