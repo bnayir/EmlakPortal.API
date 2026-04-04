@@ -1,4 +1,4 @@
-﻿using EmlakPortal.API.DTOs; // DTO klasörün
+﻿using EmlakPortal.API.DTOs; 
 using EmlakPortal.API.Models;
 using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -21,14 +21,22 @@ namespace EmlakPortal.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProperties()
         {
-            var properties = await _repository.GetAllAsync();
-            var result = properties.Select(p => new {
-                p.PropertyId,
-                p.Title,
-                p.Price,
-                p.Description
+            var properties = await _repository.GetPropertiesWithDetailsAsync();
+
+            var dtoList = properties.Select(p => new PropertyDto
+            {
+                PropertyId = p.PropertyId,
+                Title = p.Title,
+                Description = p.Description,
+                Price = p.Price,
+                CategoryId = p.CategoryId,
+                CityId = p.CityId,
+
+                CategoryName = p.Category?.CategoryName,
+                CityName = p.City?.CityName
             }).ToList();
-            return Ok(result);
+
+            return Ok(dtoList);
         }
 
         [HttpGet("{id}")]
@@ -61,14 +69,7 @@ namespace EmlakPortal.API.Controllers
 
         
 
-        [Authorize]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProperty(int id, Property property)
-        {
-            if (id != property.PropertyId) return BadRequest("ID uyuşmuyor.");
-            await _repository.UpdateAsync(property);
-            return Ok("İlan başarıyla güncellendi.");
-        }
+        
 
         [Authorize]
         [HttpGet("MyProperties")]

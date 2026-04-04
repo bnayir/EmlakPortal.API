@@ -20,5 +20,13 @@ namespace EmlakPortal.API.Repositories
                 .Include(p => p.AppUser)  
                 .ToListAsync();
         }
+
+        public async Task<List<Property>> GetPropertiesWithDetailsAsync()
+        {
+            return await _context.Set<Property>()
+                                 .Include(x => x.Category)
+                                 .Include(x => x.City)
+                                 .ToListAsync();
+        }
     }
 }

@@ -13,7 +13,6 @@ namespace EmlakPortal.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -39,10 +38,10 @@ namespace EmlakPortal.API.Controllers
 
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "Admin"); 
                 return Ok("Kullanıcı başarıyla oluşturuldu.");
             }
-
-            return BadRequest(result.Errors);
+            return BadRequest(result.Errors); 
             await _userManager.AddToRoleAsync(user, "Admin");
         }
 
@@ -54,10 +53,11 @@ namespace EmlakPortal.API.Controllers
             if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 var authClaims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
+{
+    new Claim(ClaimTypes.Name, user.UserName),
+    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
+    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+};
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuCokGizliVeUzunBirAnahtarCumlesiOlmalidir12345!"));
 
