@@ -21,11 +21,11 @@ This project is the backend service of a comprehensive Real Estate Portal. It is
     * **Layered Architecture:** Ensuring separation of concerns.
 
 ##  Key Features (Completed up to Phase 1)
-* ** Secure Authentication:** Implementation of ASP.NET Core Identity for user management.
-* ** JWT Authorization:** Secure token-based access control for API endpoints.
-* ** Role-Based Access (RBAC):** Distinct permissions for Admins and Standard Users.
-* ** Dynamic CRUD Operations:** Full API support for managing real estate listings with Repository Pattern.
-* ** Database Migrations:** Seamless schema management using EF Core Migrations.
+* **Secure Authentication:** Implementation of ASP.NET Core Identity for user management.
+* **JWT Authorization:** Secure token-based access control for API endpoints.
+* **Role-Based Access (RBAC):** Distinct permissions for Admins and Standard Users.
+* **Dynamic CRUD Operations:** Full API support for managing real estate listings with Repository Pattern.
+* **Database Migrations:** Seamless schema management using EF Core Migrations.
 
 ##  Architecture Insight
 In this project, I prioritized **security and scalability**:
