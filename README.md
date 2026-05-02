@@ -1,3 +1,7 @@
+<p align="right">
+   <strong>🇬🇧 English</strong> | <a href="README.tr.md">🇹🇷 Türkçe</a>
+   </p>
+   
 #  Real Estate Portal API
 
 > **A robust and scalable Real Estate Management System** built with **.NET 8.0**, focusing on a decoupled Web API architecture, secure authentication, and modern design patterns.
