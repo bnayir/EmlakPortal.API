@@ -5,15 +5,12 @@
 
 <div class="container-fluid">
 
-    <!-- Başlık ve Tarih -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Emlak Yönetim Paneli</h1>
         <div class="badge badge-primary p-2" id="dateBadge"></div>
     </div>
 
-    <!-- Üst İstatistik Kartları -->
     <div class="row">
-        <!-- Toplam İlan Kartı -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -28,7 +25,6 @@
             </div>
         </div>
 
-        <!-- En Değerli İlan Kartı -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
@@ -43,7 +39,6 @@
             </div>
         </div>
 
-        <!-- Şehir Sayısı Kartı -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
@@ -58,7 +53,6 @@
             </div>
         </div>
 
-        <!-- Aksiyon Kartı -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card bg-gradient-success text-white shadow h-100 py-2">
                 <div class="card-body text-center d-flex flex-column justify-content-center">
@@ -71,7 +65,6 @@
     </div>
 
     <div class="row">
-        <!-- Veritabanından Gelen Kategori Grafiği -->
         <div class="col-xl-4 col-lg-5">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
@@ -90,7 +83,6 @@
             </div>
         </div>
 
-        <!-- Son Eklenenler Tablosu -->
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -125,13 +117,12 @@
         $(document).ready(function () {
             $("#dateBadge").text(new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }));
 
-            // VERİ TABANINDAN VERİ ÇEKME
             loadDatabaseDashboard();
 
             function loadDatabaseDashboard() {
                 var token = localStorage.getItem("token");
                 $.ajax({
-                    url: "http://localhost:5155/api/Properties/MyProperties", // Senin API adresin
+                    url: "http://localhost:5155/api/Properties/MyProperties", 
                     type: "GET",
                     beforeSend: function (xhr) { xhr.setRequestHeader("Authorization", "Bearer " + token); },
                     success: function (data) {
@@ -142,10 +133,8 @@
                             return;
                         }
 
-                        // 1. İstatistik Hesaplamaları
                         $("#totalCount").text(data.length);
 
-                        // Fiyatları sayıya çevirip en büyüğünü bul
                         let prices = data.map(p => parseFloat(p.price));
                         let maxVal = Math.max(...prices);
                         $("#maxPrice").text(maxVal.toLocaleString('tr-TR') + " TL");
@@ -153,7 +142,6 @@
                         let cities = [...new Set(data.map(i => i.cityName))];
                         $("#cityCount").text(cities.length);
 
-                        // 2. Tabloyu Doldur (Son 5)
                         let tableRows = "";
                         data.slice(0, 5).forEach(p => {
                             tableRows += `<tr>
@@ -165,14 +153,12 @@
                         });
                         $("#recentProperties").html(tableRows);
 
-                        // 3. GRAFİK İÇİN VERİ GRUPLAMA (DATABASE DYNAMICS)
                         const categoryStats = {};
                         data.forEach(item => {
                             const catName = item.categoryName || "Kategorisiz";
                             categoryStats[catName] = (categoryStats[catName] || 0) + 1;
                         });
 
-                        // Grafiği çiz
                         drawDynamicChart(Object.keys(categoryStats), Object.values(categoryStats));
                     }
                 });
@@ -195,7 +181,6 @@
                     options: { maintainAspectRatio: false, legend: { display: false }, cutoutPercentage: 75 }
                 });
 
-                // Grafik altı açıklamalarını dinamik oluştur
                 let legendHtml = "";
                 labels.forEach((label, i) => {
                     legendHtml += `<span class="mr-2"><i class="fas fa-circle" style="color:${colors[i]}"></i> ${label}</span>`;

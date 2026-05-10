@@ -1,0 +1,112 @@
+﻿@{
+    ViewData["Title"] = "Profilim";
+    Layout = "_UserLayout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white font-weight-bold">
+                    <i class="fas fa-user"></i> Kişisel Bilgilerim
+                </div>
+                <div class="card-body p-4">
+                    <form id="profileForm">
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold text-muted">Kullanıcı Adı</label>
+                            <input type="text" id="userName" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold text-muted">E-posta Adresi</label>
+                            <input type="email" id="email" class="form-control bg-light" readonly>
+                        </div>
+                        <p class="text-muted small">* Bilgilerinizi güncellemek için destek ile iletişime geçin.</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white font-weight-bold">
+                    <i class="fas fa-key"></i> Şifremi Değiştir
+                </div>
+                <div class="card-body p-4">
+                    <form id="changePasswordForm">
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold">Mevcut Şifre</label>
+                            <input type="password" id="currentPassword" class="form-control" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold">Yeni Şifre</label>
+                            <input type="password" id="newPassword" class="form-control" required>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label class="small font-weight-bold">Yeni Şifre (Tekrar)</label>
+                            <input type="password" id="confirmPassword" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning btn-block font-weight-bold">
+                            Şifreyi Güncelle
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const apiBaseUrl = "http://localhost:5155/api";
+        const token = localStorage.getItem("token");
+
+        $(document).ready(function () {
+            if (!token) { window.location.href = "/Auth/Login"; return; }
+
+            $.ajax({
+                url: apiBaseUrl + "/Auth/Me", 
+                type: "GET",
+                headers: { "Authorization": "Bearer " + token },
+                success: function (data) {
+                    $("#userName").val(data.userName);
+                    $("#email").val(data.email);
+                },
+                error: function() {
+                    alert("Kullanıcı bilgileri yüklenemedi.");
+                }
+            });
+
+            $("#changePasswordForm").on("submit", function (e) {
+                e.preventDefault();
+
+                const newPass = $("#newPassword").val();
+                const confirmPass = $("#confirmPassword").val();
+
+                if (newPass !== confirmPass) {
+                    alert("Yeni şifreler eşleşmiyor!");
+                    return;
+                }
+
+                const passwordData = {
+                    CurrentPassword: $("#currentPassword").val(),
+                    NewPassword: newPass
+                };
+
+                $.ajax({
+                    url: apiBaseUrl + "/Auth/ChangePassword",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(passwordData),
+                    headers: { "Authorization": "Bearer " + token },
+                    success: function () {
+                        alert("Şifreniz başarıyla değiştirildi!");
+                        $("#changePasswordForm")[0].reset();
+                    },
+                    error: function (xhr) {
+                        alert("Hata: " + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Emlak Portalı</title>
 
-    <!-- 1. TAMAMEN YEREL DOSYALAR (SB Admin 2 Klasörlerinden) -->
-    <!-- FontAwesome İkonları -->
     <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <!-- SB Admin 2'nin kendi Bootstrap tabanlı CSS'i -->
     <link href="~/css/sb-admin-2.min.css" rel="stylesheet">
 
-    <!-- Sadece Vitrin İçin Ufak Tasarım Dokunuşları -->
     <style>
         body {
             display: flex;
@@ -29,7 +25,6 @@
             font-weight: 700;
             color: #4e73df !important;
         }
-        /* SB Admin 2 Mavi Rengi */
         .nav-link {
             font-weight: 500;
             color: #5a5c69 !important;
@@ -48,7 +43,6 @@
 </head>
 <body>
 
-    <!-- 2. ÜST MENÜ (Navbar) -->
     <header class="sticky-top shadow-sm">
         <nav class="navbar navbar-expand-lg navbar-light custom-navbar py-3">
             <div class="container">
@@ -63,11 +57,16 @@
                     <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
                         <li class="nav-item mx-1"><a class="nav-link" asp-controller="Home" asp-action="Index">Ana Sayfa</a></li>
                         <li class="nav-item mx-1"><a class="nav-link" asp-controller="Home" asp-action="Categories">Kategoriler</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Favorites/Index">
+                                <i class="fas fa-heart text-danger"></i> Favorilerim
+                            </a>
+                        </li>
                         <li class="nav-item mx-1"><a class="nav-link" asp-controller="Home" asp-action="About">Hakkımızda</a></li>
                     </ul>
 
                     <ul class="navbar-nav ml-auto align-items-center">
-                        <li class="nav-item mx-1"><a class="nav-link text-primary font-weight-bold" asp-controller="Home" asp-action="Profile" id="UserName"></a></li>
+                        <li class="nav-item mx-1"><a class="nav-link text-primary font-weight-bold" href="/Profile/Index" id="UserName"></a></li>
                         <li class="nav-item ml-2" id="liLogin">
                             <a class="btn btn-outline-primary rounded-pill px-4" asp-controller="Auth" asp-action="Login">Giriş Yap</a>
                         </li>
@@ -88,14 +87,12 @@
         </nav>
     </header>
 
-    <!-- 3. İÇERİK ALANI -->
     <div class="container my-5 flex-grow-1">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <!-- 4. ALT BİLGİ (Footer) -->
     <footer class="custom-footer pt-4 pb-3">
         <div class="container text-center">
             <h5 class="text-uppercase mb-2"><i class="fas fa-building me-2"></i>Emlak Portalı</h5>
@@ -103,21 +100,16 @@
         </div>
     </footer>
 
-    <!-- 5. TAMAMEN YEREL JAVASCRIPT DOSYALARI (SB Admin 2 Klasörlerinden) -->
     <script src="~/vendor/jquery/jquery.min.js"></script>
     <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
-    <!-- SB Admin 2 Çekirdek JS -->
     <script src="~/js/sb-admin-2.min.js"></script>
 
-    <!-- 6. GİRİŞ KONTROL ZEKASI (Token) -->
     <script>
         $(document).ready(function () {
-            // Cebimizde bilet (Token) var mı?
             var token = localStorage.getItem("token");
 
             if (token) {
-                // Giriş yapmışsak: Giriş ve Üye Ol butonlarını gizle, Çıkış butonunu göster
                 $("#liLogin").hide();
                 $("#liRegister").hide();
                 $("#liAdmin").show();
@@ -125,11 +117,10 @@
                 $("#UserName").html("<i class='fas fa-user-circle me-1'></i> Hesabım");
             }
 
-            // Çıkış yapma işlemi
             $("#Logout").click(function (e) {
                 e.preventDefault();
-                localStorage.removeItem("token"); // Bileti sil
-                window.location.href = "/Home/Index"; // Sayfayı yenile
+                localStorage.removeItem("token"); 
+                window.location.href = "/Home/Index"; 
             });
         });
     </script>

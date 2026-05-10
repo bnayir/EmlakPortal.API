@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = null; // Giriş sayfasında sidebar olmasın diye layout'u kapattık
+    Layout = null; 
 }
 <!DOCTYPE html>
 <html lang="tr">
@@ -53,7 +53,6 @@
                 contentType: "application/json",
                 data: JSON.stringify(loginData),
                 success: function (response) {
-                    // API'den dönen token'ı kaydet
                     localStorage.setItem("token", response.token);
                     alert("Giriş başarılı! Panale yönlendiriliyorsunuz.");
                     window.location.href = "/Home/Index";

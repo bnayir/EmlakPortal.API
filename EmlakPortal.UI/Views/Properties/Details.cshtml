@@ -1,137 +1,128 @@
 ﻿@{
     ViewData["Title"] = "İlan Detayı";
-}
-@{
     Layout = "_UserLayout";
 }
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800" id="detailTitle">Yükleniyor...</h1>
-        <a href="/Home/Index" class="btn btn-secondary btn-sm shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Vitrine Dön
-        </a>
+<div class="container mt-5 mb-5" id="detailContainer">
+    <div class="text-center py-5" id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="mt-3 text-muted">İlan detayları yükleniyor...</h5>
     </div>
-
-    <div class="row">
-        <!-- Sol Taraf: Resim ve Açıklama -->
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-body text-center">
-                    <img id="detailImage" src="/images/no-image.jpg" class="img-fluid rounded" style="max-height: 400px; width: 100%; object-fit: cover;">
-                </div>
-            </div>
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">İlan Açıklaması</h6>
-                </div>
-                <div class="card-body">
-                    <p id="detailDescription" class="text-gray-700"></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sağ Taraf: Fiyat ve Bilgiler -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-lg sticky-top" style="border-radius: 15px; top: 100px;">
-                <div class="card-body p-4">
-
-                    <div class="mb-3">
-                        <span class="badge bg-primary px-3 py-2 rounded-pill" id="detailCategory">Kategori</span>
-                    </div>
-
-                    <h2 class="text-primary fw-bolder mb-3" id="detailPrice">0 TL</h2>
-
-                    <hr class="text-muted opacity-25" />
-
-                    <div class="mb-3">
-                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                        <span id="detailLocation" class="fw-bold">Şehir / İlçe</span>
-                    </div>
-
-                    <div class="mb-4">
-                        <i class="fas fa-calendar-alt text-primary me-2"></i>
-                        <span class="small text-muted">Yayınlanma: @DateTime.Now.ToString("dd.MM.yyyy")</span>
-                    </div>
-
-                    <!-- Senin Satıcıyı Ara Butonun -->
-                    <button class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm mb-3">
-                        <i class="fas fa-phone-alt me-2"></i> Satıcıyı Ara
-                    </button>
-
-                    <!-- Az Önce Yaptığımız Favorilere Ekle Butonu -->
-                    <button id="btnFavorite" data-id="1" class="btn btn-outline-danger w-100 py-2 rounded-pill fw-bold">
-                        <i class="far fa-heart me-2" id="favIcon"></i> <span id="favText">Favorilere Ekle</span>
-                    </button>
-
-                </div>
-            </div>
-        </div>
+</div>
 
 @section Scripts {
-            <script>
-                $(document).ready(function () {
+    <script>
+        const apiBaseUrl = "http://localhost:5155/api";
+        const propertyId = window.location.pathname.split('/').pop();
 
-                    // --- 1. BÖLÜM: API'DEN İLAN BİLGİLERİNİ GETİRME ---
-                    const apiBaseUrl = "http://localhost:5155/api";
+        const token = localStorage.getItem("token");
 
-                    // URL'den ID'yi al (Örn: /Properties/Details/5 -> 5'i alır)
-                    const urlPath = window.location.pathname;
-                    const propertyId = urlPath.split("/").pop();
+        $(document).ready(function () {
+            $.ajax({
+                url: apiBaseUrl + "/Properties/" + propertyId,
+                type: "GET",
+                success: function (data) {
+                    renderDetails(data);
+                },
+                error: function () {
+                    $("#detailContainer").html(`<div class="alert alert-danger text-center"><h4><i class="fas fa-exclamation-triangle"></i> İlan bulunamadı veya yayından kaldırılmış.</h4></div>`);
+                }
+            });
+        });
 
-                    if (propertyId) {
-                        $.get(`${apiBaseUrl}/Properties/${propertyId}`, function (data) {
-                            // Verileri yerleştir (Case-sensitivity için çift kontrol)
-                            const title = data.title || data.Title;
-                            const price = data.price || data.Price;
-                            const desc = data.description || data.Description;
-                            const city = data.cityName || data.CityName;
-                            const district = data.districtName || data.DistrictName;
-                            const category = data.categoryName || data.CategoryName;
+        function renderDetails(item) {
+            const imageUrl = item.imageUrl ? item.imageUrl : "/images/default.png";
 
-                            $("#detailTitle").text(title);
-                            $("#detailDescription").text(desc || "Açıklama belirtilmemiş.");
-                            $("#detailPrice").text(price.toLocaleString('tr-TR') + " TL");
-                            $("#detailLocation").text(`${city} / ${district}`);
-                            $("#detailCategory").text(category);
+            const html = `
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm border-0 mb-4">
+                            <img src="${imageUrl}" class="card-img-top rounded-top" alt="${item.title}" style="max-height: 500px; object-fit: cover;">
+                            <div class="card-body p-4">
+                                <h2 class="font-weight-bold text-dark">${item.title}</h2>
+                                <p class="text-muted"><i class="fas fa-map-marker-alt text-danger"></i> ${item.cityName || 'Şehir'} / ${item.districtName || 'İlçe'}</p>
 
-                        }).fail(function() {
-                            alert("İlan detayları getirilemedi!");
-                        });
-                    }
+                                <hr>
 
-                    // --- 2. BÖLÜM: FAVORİLERE EKLE BUTONU ANİMASYONU ---
-                    $("#btnFavorite").click(function () {
-                        var btn = $(this);
-                        var icon = $("#favIcon");
-                        var text = $("#favText");
-                        // data-id değerini URL'den aldığımız gerçek propertyId ile güncelleyebiliriz
-                        var currentPropId = propertyId || btn.data("id");
+                                <h4 class="font-weight-bold mt-4 mb-3">İlan Açıklaması</h4>
+                                <p style="font-size: 1.1rem; line-height: 1.8;">${item.description || 'Bu ilan için henüz bir açıklama girilmemiştir.'}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                        // Eğer buton zaten doluysa (yani favorilerdeyse), favorilerden çıkaralım
-                        if (btn.hasClass("btn-danger")) {
+                    <div class="col-lg-4">
+                        <div class="card shadow-sm border-0 mb-4 sticky-top" style="top: 20px;">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <span class="badge badge-primary px-3 py-2 mb-2" style="font-size: 1rem;">${item.categoryName || 'Emlak'} - ${item.propertyType}</span>
+                                    <h1 class="text-success font-weight-bold">${item.price ? item.price.toLocaleString('tr-TR') : '0'} TL</h1>
+                                </div>
 
-                            // BURAYA BACKEND SİLME İSTEĞİ GELECEK
-                            // $.post('/Properties/RemoveFromFavorites', { id: currentPropId }, function() { ... });
+                                <ul class="list-group list-group-flush mb-4">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted"><i class="fas fa-ruler-combined w-20px"></i> Metrekare</span>
+                                        <span class="font-weight-bold">${item.squareMeter} m²</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted"><i class="fas fa-bed w-20px"></i> Oda Sayısı</span>
+                                        <span class="font-weight-bold">${item.roomCount}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted"><i class="fas fa-building w-20px"></i> Bulunduğu Kat</span>
+                                        <span class="font-weight-bold">${item.floorLocation}. Kat</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted"><i class="fas fa-layer-group w-20px"></i> Bina Kat Sayısı</span>
+                                        <span class="font-weight-bold">${item.floorsCount} Katlı</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted"><i class="fas fa-fire w-20px"></i> Isıtma</span>
+                                        <span class="font-weight-bold">${item.heating}</span>
+                                    </li>
+                                </ul>
 
-                            // Görseli eski haline çevir
-                            btn.removeClass("btn-danger text-white").addClass("btn-outline-danger");
-                            icon.removeClass("fas").addClass("far"); // Kalbin içini boşalt
-                            text.text("Favorilere Ekle");
+                                <button class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm mb-2">
+                                    <i class="fas fa-phone-alt"></i> Satıcıyı Ara
+                                </button>
 
-                        }
-                        // Eğer favorilerde değilse, favorilere ekleyelim
-                        else {
+                                <button id="btnFavorite" onclick="addToFavorites()" class="btn btn-outline-danger btn-block font-weight-bold">
+                                    <i class="far fa-heart"></i> Favorilere Ekle
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $("#detailContainer").html(html);
+        }
 
-                            // BURAYA BACKEND EKLEME İSTEĞİ GELECEK
-                            // $.post('/Properties/AddToFavorites', { id: currentPropId }, function() { ... });
+        function addToFavorites() {
+             if (!token) {
+                 alert("Favorilere eklemek için önce giriş yapmalısınız.");
+                 window.location.href = "/Auth/Login";
+                 return;
+             }
 
-                            // Görseli kırmızı yap
-                            btn.removeClass("btn-outline-danger").addClass("btn-danger text-white");
-                            icon.removeClass("far").addClass("fas"); // Kalbin içini doldur
-                            text.text("Favorilerde");
-                        }
-                    });
+             const favoriteData = {
+                 PropertyId: parseInt(propertyId)
+             };
 
-                });
-            </script>
+             $.ajax({
+                 url: apiBaseUrl + "/Favorites", 
+                 type: "POST",
+                 contentType: "application/json", 
+                 data: JSON.stringify(favoriteData), 
+                 headers: {
+                     "Authorization": "Bearer " + token
+                 },
+                 success: function () {
+                     alert("İlan favorilerinize eklendi!");
+                     $("#btnFavorite").removeClass("btn-outline-danger").addClass("btn-danger text-white").html('<i class="fas fa-heart"></i> Favorilerinizde');
+                 },
+                 error: function (xhr) {
+                     alert("Hata: " + xhr.responseText);
+                 }
+             });
+         }
+        
+    </script>
 }

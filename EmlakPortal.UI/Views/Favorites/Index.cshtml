@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Favorilerim";
+    Layout = "_UserLayout";
+}
+
+<div class="container mt-5">
+    <h2 class="fw-bold mb-4"><i class="fas fa-heart text-danger"></i> Favori İlanlarım</h2>
+    <div class="row" id="favoritesContainer">
+        </div>
+</div>
+
+@section Scripts {
+    <script>
+        const apiBaseUrl = "http://localhost:5155/api";
+        const token = localStorage.getItem("token");
+
+        $(document).ready(function () {
+            if (!token) { window.location.href = "/Auth/Login"; return; }
+
+            $.ajax({
+                url: apiBaseUrl + "/Favorites/MyFavorites",
+                type: "GET",
+                headers: { "Authorization": "Bearer " + token },
+                success: function (data) {
+                    let html = "";
+                    
+                    if(data.length === 0) {
+                        html = '<div class="col-12 text-center py-5"><i class="far fa-heart fa-3x text-muted mb-3"></i><h5>Henüz favori ilanınız yok.</h5></div>';
+                    } else {
+                        data.forEach(item => {
+                            html += `
+                                <div class="col-md-4 mb-4" id="fav-row-${item.favoriteId}">
+                                    <div class="card h-100 shadow-sm border-0">
+                                        <img src="${item.imageUrl || '/images/default.png'}" class="card-img-top" style="height:200px; object-fit:cover;">
+                                        <div class="card-body">
+                                            <h5 class="fw-bold text-truncate" title="${item.title}">${item.title}</h5>
+                                            <p class="text-success fw-bold" style="font-size: 1.2rem;">${item.price ? item.price.toLocaleString('tr-TR') : '0'} TL</p>
+
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <a href="/Properties/Details/${item.propertyId}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i> Detay
+                                                </a>
+
+                                                <button onclick="removeFromFavorites(${item.favoriteId})" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash-alt"></i> Kaldır
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                    
+                    $("#favoritesContainer").html(html);
+                },
+                error: function(xhr) {
+                    $("#favoritesContainer").html('<div class="col-12 text-center text-danger"><h5>Favoriler yüklenirken bir hata oluştu.</h5></div>');
+                }
+            });
+        });
+
+        function removeFromFavorites(favoriteId) {
+            if (confirm("Bu ilanı favorilerinizden çıkarmak istediğinize emin misiniz?")) {
+                $.ajax({
+                    url: apiBaseUrl + "/Favorites/" + favoriteId, 
+                    type: "DELETE",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function () {
+                        $(`#fav-row-${favoriteId}`).fadeOut(500, function() {
+                            $(this).remove();
+                            
+                            if ($("#favoritesContainer").children().length === 0) {
+                                $("#favoritesContainer").html('<div class="col-12 text-center py-5"><i class="far fa-heart fa-3x text-muted mb-3"></i><h5>Henüz favori ilanınız yok.</h5></div>');
+                            }
+                        });
+                    },
+                    error: function (xhr) {
+                        alert("Silme işlemi başarısız: " + xhr.responseText);
+                    }
+                });
+            }
+        }
+    </script>
+}

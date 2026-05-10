@@ -1,10 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Ana Sayfa";
-    // Layout = "_UserLayout"; yazmamıza gerek yok, _ViewStart hallediyor!
 }
 
 <style>
-    /* İlan Kartlarına Özel Modern Efektler */
     .property-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border-radius: 12px;
@@ -29,12 +27,11 @@
     }
 
     .price-tag {
-        color: #2563eb; /* Dikkat çekici bir mavi */
+        color: #2563eb;
         font-weight: 800;
         font-size: 1.4rem;
     }
 
-    /* Üstteki Karşılama Alanı */
     .hero-section {
         background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
         color: white;
@@ -43,7 +40,6 @@
         margin-top: 10px;
     }
 
-    /* Filtreleme Kutusu (Yukarı Taştı Efekti) */
     .filter-box {
         margin-top: -50px;
         border-radius: 15px;
@@ -52,13 +48,11 @@
     }
 </style>
 
-<!-- KARŞILAMA ALANI (HERO) -->
 <div class="hero-section text-center shadow">
     <h1 class="fw-bold display-5 mb-3">Hayalinizdeki Evi Keşfedin</h1>
     <p class="lead opacity-75">Binlerce güncel satılık ve kiralık ilan arasından size en uygun olanı bulun.</p>
 </div>
 
-<!-- FİLTRELEME ALANI -->
 <div class="card shadow-lg border-0 filter-box mx-auto w-100" style="max-width: 1000px;">
     <div class="card-body p-4 p-md-5">
         <form id="searchForm" class="row g-3 align-items-end">
@@ -73,18 +67,18 @@
                 <label class="form-label fw-bold text-muted small">Şehir</label>
                 <select class="form-select bg-light" id="citySelect">
                     <option value="">Tüm Şehirler</option>
-                    <option value="Antalya">Antalya</option>
-                    <option value="İstanbul">İstanbul</option>
-                    <option value="Ankara">Ankara</option>
+                    <option value="1">Antalya</option>
+                    <option value="34">İstanbul</option>
+                    <option value="6">Ankara</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold text-muted small">Kategori</label>
                 <select class="form-select bg-light" id="categorySelect">
                     <option value="">Tüm Kategoriler</option>
-                    <option value="Konut">Konut</option>
-                    <option value="İşyeri">İşyeri</option>
-                    <option value="Arsa">Arsa</option>
+                    <option value="1">Konut</option>
+                    <option value="2">İşyeri</option>
+                    <option value="3">Arsa</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -96,63 +90,79 @@
     </div>
 </div>
 
-<!-- İLANLAR VİTRİNİ -->
 <div class="mt-5 pt-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold text-dark mb-0">Güncel İlanlar</h3>
         <span class="text-muted small" id="resultCount">Yükleniyor...</span>
     </div>
 
-    <!-- İlan Kartlarının Geleceği Konteyner -->
     <div class="row g-4" id="listingsContainer">
-
-        <!-- Yükleniyor Animasyonu (API'den veri gelene kadar görünür) -->
         <div class="col-12 text-center py-5" id="loadingSpinner">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Yükleniyor...</span>
             </div>
             <p class="mt-2 text-muted">İlanlar getiriliyor...</p>
         </div>
-
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // API Adresini kendi backend portuna göre ayarla (Örn: 5155)
         const apiBaseUrl = "http://localhost:5155/api";
 
         $(document).ready(function () {
-            // Sayfa açıldığında tüm ilanları getir
             fetchProperties();
         });
 
-        // İlanları çeken fonksiyon
         function fetchProperties() {
-            // $("#loadingSpinner").show();
-            // $("#listingsContainer").empty().append($("#loadingSpinner"));
+            showLoading();
 
-            // ÖRNEK: API'ye istek atma kodu (Şu an API çalışmadığı için örnek veri gösterelim ki tasarımı gör)
-
-            /* Gerçek kodun böyle olacak:
-            $.get(`${apiBaseUrl}/Properties`, function (data) {
-                renderListings(data);
-            }).fail(function() {
-                $("#listingsContainer").html('<div class="col-12 text-center text-danger">İlanlar yüklenirken bir hata oluştu!</div>');
+            $.ajax({
+                url: apiBaseUrl + "/Properties",
+                type: "GET",
+                success: function (data) {
+                    renderListings(data);
+                },
+                error: function () {
+                    showError("İlanlar yüklenirken sunucu ile bağlantı kurulamadı.");
+                }
             });
-            */
-
-            // Tasarımı görebilmen için DUMMY (Sahte) Veri üretiyorum:
-            const dummyData = [
-                { id: 1, title: "Konyaaltı'nda Deniz Manzaralı 3+1 Lüks Daire", price: 4500000, city: "Antalya", district: "Konyaaltı", category: "Konut", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-                { id: 2, title: "Merkezde Yatırımlık Dükkan", price: 8500000, city: "İstanbul", district: "Şişli", category: "İşyeri", image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
-                { id: 3, title: "Kepez'de Satılık İmarlı Arsa", price: 1200000, city: "Antalya", district: "Kepez", category: "Arsa", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }
-            ];
-
-            setTimeout(() => renderListings(dummyData), 500); // Yarım saniye yükleniyor efekti
         }
 
-        // Gelen veriyi ekrana çizen fonksiyon
+        function filterProperties() {
+            const keyword = $("#keyword").val().trim();
+            const cityId = $("#citySelect").val();
+            const categoryId = $("#categorySelect").val();
+
+            let url = apiBaseUrl + "/Properties/Search?";
+
+            if (keyword) url += "Keyword=" + keyword + "&";
+            if (cityId) url += "CityId=" + cityId + "&";
+            if (categoryId) url += "CategoryId=" + categoryId + "&";
+
+            if (!keyword && !cityId && !categoryId) {
+                fetchProperties();
+                return;
+            }
+
+            showLoading();
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                success: function (data) {
+                    renderListings(data);
+                },
+                error: function (xhr) {
+                    if(xhr.status === 404){
+                        renderListings([]); 
+                    } else {
+                        showError("Arama yapılırken bir hata oluştu.");
+                    }
+                }
+            });
+        }
+
         function renderListings(data) {
             const container = $("#listingsContainer");
             container.empty();
@@ -174,20 +184,22 @@
             $("#resultCount").text(`${data.length} İlan Bulundu`);
 
             data.forEach(item => {
+                const imageUrl = item.imageUrl ? item.imageUrl : "/images/default.png";
+
                 const cardHtml = `
                     <div class="col-lg-4 col-md-6">
                         <div class="card h-100 border-0 shadow-sm property-card">
                             <div class="position-relative">
-                                <img src="${item.image}" class="card-img-top" alt="${item.title}" style="height: 220px; object-fit: cover;">
-                                <div class="property-badge">${item.category}</div>
+                                <img src="${imageUrl}" class="card-img-top" alt="${item.title}" style="height: 220px; object-fit: cover;">
+                                <div class="property-badge">${item.categoryName || 'Emlak'}</div>
                             </div>
                             <div class="card-body p-4">
                                 <h5 class="card-title fw-bold text-truncate" title="${item.title}">${item.title}</h5>
-                                <div class="price-tag mb-3">${item.price.toLocaleString('tr-TR')} ₺</div>
+                                <div class="price-tag mb-3">${item.price ? item.price.toLocaleString('tr-TR') : '0'} ₺</div>
                                 <div class="d-flex text-muted small mb-4">
-                                    <div class="me-3"><i class="fas fa-map-marker-alt text-primary me-1"></i> ${item.city} / ${item.district}</div>
+                                    <div class="me-3"><i class="fas fa-map-marker-alt text-primary me-1"></i> ${item.cityName || 'Şehir'} / ${item.districtName || 'İlçe'}</div>
                                 </div>
-                                <a href="/Properties/Details/${item.id}" class="btn btn-outline-primary w-100 fw-bold rounded-pill">
+                                <a href="/Properties/Details/${item.propertyId}" class="btn btn-outline-primary w-100 fw-bold rounded-pill">
                                     İlanı İncele <i class="fas fa-arrow-right ms-1"></i>
                                 </a>
                             </div>
@@ -198,9 +210,19 @@
             });
         }
 
-        function filterProperties() {
-            alert("Filtreleme kodları API ile bağlandığında çalışacak!");
-            // Burada formdaki değerleri alıp API'ye query string olarak göndereceksin.
+        function showLoading() {
+            $("#listingsContainer").html(`
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Yükleniyor...</p>
+                </div>
+            `);
+            $("#resultCount").text("Yükleniyor...");
+        }
+
+        function showError(message) {
+            $("#listingsContainer").html(`<div class="col-12 text-center text-danger py-5"><i class="fas fa-exclamation-triangle fa-2x mb-3"></i><h5>${message}</h5></div>`);
+            $("#resultCount").text("Hata");
         }
     </script>
 }

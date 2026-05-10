@@ -1,24 +1,23 @@
 ﻿@{
-    ViewData["Title"] = "Yeni İlan Ekle";
-    Layout = "_Layout"; 
+    ViewData["Title"] = "İlanı Düzenle";
+    Layout = "_Layout";
 }
 
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Yeni İlan Oluştur</h1>
+    <h1 class="h3 mb-4 text-gray-800">İlanı Düzenle</h1>
 
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">İlan Bilgileri</h6>
-                </div>
                 <div class="card-body">
-                    <form id="propertyForm">
+                    <form id="editPropertyForm">
+                        <input type="hidden" id="propertyId" value="@ViewBag.PropertyId" />
+
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="form-group">
                                     <label class="font-weight-bold">İlan Başlığı</label>
-                                    <input type="text" class="form-control" id="title" placeholder="Örn: Havuzlu Lüks Villa" required="required">
+                                    <input type="text" class="form-control" id="title" required="required">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -79,7 +78,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="font-weight-bold">Metrekare</label>
-                                    <input type="number" class="form-control" id="squareMeter" placeholder="120" required="required">
+                                    <input type="number" class="form-control" id="squareMeter" required="required">
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -89,7 +88,7 @@
                                         <option value="1+0">1+0 (Stüdyo)</option>
                                         <option value="1+1">1+1</option>
                                         <option value="2+1">2+1</option>
-                                        <option value="3+1" selected="selected">3+1</option>
+                                        <option value="3+1">3+1</option>
                                         <option value="4+1">4+1 ve Üzeri</option>
                                     </select>
                                 </div>
@@ -97,13 +96,13 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="font-weight-bold">Bina Katı</label>
-                                    <input type="number" class="form-control" id="floorsCount" placeholder="Örn: 5" required="required">
+                                    <input type="number" class="form-control" id="floorsCount" required="required">
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="font-weight-bold">Bulunduğu Kat</label>
-                                    <input type="text" class="form-control" id="floorLocation" placeholder="Örn: 2" required="required">
+                                    <input type="text" class="form-control" id="floorLocation" required="required">
                                 </div>
                             </div>
                             <div class="col-md-2">
@@ -122,31 +121,11 @@
                             <label class="font-weight-bold">Açıklama</label>
                             <textarea class="form-control" id="description" rows="5"></textarea>
                         </div>
-                        <div class="form-group border p-3 rounded bg-light">
-                            <label class="font-weight-bold text-dark"><i class="fas fa-camera"></i> İlan Resmi Yükle</label>
-                            <input type="file" class="form-control-file" id="imageFile" accept="image/*">
-                            <small class="text-muted">Sadece .jpg, .png veya .jpeg formatında resimler.</small>
-                        </div>
 
-                        <button type="submit" class="btn btn-primary btn-block shadow-sm">
-                            <i class="fas fa-check-circle"></i> İlanı Yayınla
+                        <button type="submit" class="btn btn-warning btn-block shadow-sm">
+                            <i class="fas fa-save"></i> Değişiklikleri Kaydet
                         </button>
                     </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-light">
-                    <h6 class="m-0 font-weight-bold text-secondary">İpuçları</h6>
-                </div>
-                <div class="card-body small text-muted">
-                    <ul>
-                        <li>Başlığın ilgi çekici olmasına dikkat edin.</li>
-                        <li>Fiyatı güncel piyasa değerine göre girin.</li>
-                        <li>Açıklama kısmında evin tüm detaylarından bahsedin.</li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -156,90 +135,67 @@
 @section Scripts {
     <script>
         const apiBaseUrl = "http://localhost:5155/api";
+        const token = localStorage.getItem("token");
+        const propertyId = $("#propertyId").val(); 
 
-        $("#propertyForm").on("submit", function (e) {
-            e.preventDefault();
-
-            const propertyData = {
-                "Title": $("#title").val().trim(),
-                "Description": $("#description").val().trim(),
-                "Price": parseFloat($("#price").val()),
-
-                "CityId": parseInt($("#city").val()),
-                "DistrictId": parseInt($("#district").val()),
-                "CategoryId": parseInt($("#category").val()),
-                "SquareMeter": parseInt($("#squareMeter").val()),
-
-                "RoomCount": $("#roomCount").val(),
-                "PropertyType": $("#propertyType").val(),
-                "FloorsCount": $("#floorsCount").val(),
-                "FloorLocation": $("#floorLocation").val(),
-                "Heating": $("#heating").val(),
-
-                "ImageUrl": "default.png"
-            };
-
-            console.log("Gönderilen Veri:", propertyData);
-
-            const token = localStorage.getItem("token");
-            console.log("Cebimdeki Bilet:", token);
-
-            if (!token) {
-                alert("Güvenlik hatası: Giriş biletiniz bulunamadı. Lütfen tekrar giriş yapın.");
-                window.location.href = "/Auth/Login";
-                return; 
-            }
-
+        $(document).ready(function () {
             $.ajax({
-                url: apiBaseUrl + "/Properties",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(propertyData),
-                headers: {
-                    "Authorization": "Bearer " + token
+                url: apiBaseUrl + "/Properties/" + propertyId,
+                type: "GET",
+                success: function (data) {
+                    $("#title").val(data.title);
+                    $("#price").val(data.price);
+                    $("#category").val(data.categoryId);
+                    $("#propertyType").val(data.propertyType);
+                    $("#city").val(data.cityId);
+                    $("#district").val(data.districtId);
+                    $("#squareMeter").val(data.squareMeter);
+                    $("#roomCount").val(data.roomCount);
+                    $("#floorsCount").val(data.floorsCount);
+                    $("#floorLocation").val(data.floorLocation);
+                    $("#heating").val(data.heating);
+                    $("#description").val(data.description);
                 },
-                       success: function (response) {
-            const newPropertyId = response.propertyId;
+                error: function () {
+                    alert("İlan bilgileri getirilemedi.");
+                }
+            });
 
-            const fileInput = document.getElementById("imageFile");
+            $("#editPropertyForm").on("submit", function (e) {
+                e.preventDefault();
 
-            if (fileInput.files.length > 0) {
-                const formData = new FormData();
-                formData.append("file", fileInput.files[0]); 
+                const updateData = {
+                    "PropertyId": parseInt(propertyId), 
+                    "Title": $("#title").val().trim(),
+                    "Description": $("#description").val().trim(),
+                    "Price": parseFloat($("#price").val()),
+                    "CityId": parseInt($("#city").val()),
+                    "DistrictId": parseInt($("#district").val()),
+                    "CategoryId": parseInt($("#category").val()),
+                    "SquareMeter": parseInt($("#squareMeter").val()),
+                    "RoomCount": $("#roomCount").val(),
+                    "PropertyType": $("#propertyType").val(),
+                    "FloorsCount": $("#floorsCount").val(),
+                    "FloorLocation": $("#floorLocation").val(),
+                    "Heating": $("#heating").val()
+                };
 
                 $.ajax({
-                    url: apiBaseUrl + "/Properties/UploadImage/" + newPropertyId,
-                    type: "POST",
-                    data: formData,
-                    processData: false, 
-                    contentType: false, 
+                    url: apiBaseUrl + "/Properties",
+                    type: "PUT", 
+                    contentType: "application/json",
+                    data: JSON.stringify(updateData),
                     headers: {
                         "Authorization": "Bearer " + token
                     },
-                    success: function (imageResponse) {
-                        alert("Tebrikler! İlanınız ve resmi başarıyla yüklendi.");
-                        window.location.href = "/Admin/Index";
+                    success: function () {
+                        alert("İlan başarıyla güncellendi!");
+                        window.location.href = "/Admin/Index"; 
                     },
                     error: function (xhr) {
-                        alert("İlan eklendi ama resim yüklenirken bir sorun oluştu.");
-                        console.log(xhr);
-                        window.location.href = "/Admin/Index";
+                        alert("Hata: " + xhr.responseText);
                     }
                 });
-            } else {
-                alert("Tebrikler! İlanınız (resimsiz olarak) başarıyla eklendi.");
-                window.location.href = "/Admin/Index";
-            }
-        },
-                error: function (xhr) {
-                    console.log("Tam Hata Raporu:", xhr);
-
-                    if (xhr.status === 401) {
-                        alert("Hata (401): Yetkisiz giriş! Token geçersiz veya süresi dolmuş olabilir.");
-                    } else {
-                        alert("API Hatası: " + xhr.responseText);
-                    }
-                }
             });
         });
     </script>
