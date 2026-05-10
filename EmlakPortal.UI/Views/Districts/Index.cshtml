@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "İlçe Yönetimi";
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">İlçe ve Bölge Yönetimi</h6>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>İlçe Adı</th>
+                    <th>Bağlı Olduğu Şehir</th>
+                </tr>
+            </thead>
+            <tbody id="districtList"></tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: "https://localhost:5155/api/Districts", // API'de tüm ilçeleri getiren bir metot olduğunu varsayıyoruz
+                type: "GET",
+                success: function (data) {
+                    let rows = "";
+                    $.each(data, function (i, item) {
+                        rows += `<tr><td>${item.districtName}</td><td>${item.cityName}</td></tr>`;
+                    });
+                    $("#districtList").html(rows);
+                }
+            });
+        });
+    </script>
+}

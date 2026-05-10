@@ -1,0 +1,256 @@
+﻿@{
+    ViewData["Title"] = "Yeni İlan Ekle";
+    Layout = "_Layout"; // Admin/Kontrol Paneli kalıbını kullanıyoruz
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Yeni İlan Oluştur</h1>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">İlan Bilgileri</h6>
+                </div>
+                <div class="card-body">
+                    <form id="propertyForm">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">İlan Başlığı</label>
+                                    <input type="text" class="form-control" id="title" placeholder="Örn: Havuzlu Lüks Villa" required="required">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Fiyat (TL)</label>
+                                    <input type="number" class="form-control" id="price" required="required">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Kategori</label>
+                                    <select class="form-control" id="category">
+                                        <option value="1">Konut</option>
+                                        <option value="2">İşyeri</option>
+                                        <option value="3">Arsa</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Emlak Tipi</label>
+                                    <select class="form-control" id="propertyType">
+                                        <option value="Satılık">Satılık</option>
+                                        <option value="Kiralık">Kiralık</option>
+                                        <option value="Günlük Kiralık">Günlük Kiralık</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Şehir</label>
+                                    <select class="form-control" id="city">
+                                        <option value="1">Antalya</option>
+                                        <option value="34">İstanbul</option>
+                                        <option value="6">Ankara</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">İlçe</label>
+                                    <select class="form-control" id="district">
+                                        <option value="1">Muratpaşa</option>
+                                        <option value="2">Kepez</option>
+                                        <option value="3">Konyaaltı</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Metrekare</label>
+                                    <input type="number" class="form-control" id="squareMeter" placeholder="120" required="required">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Oda Sayısı</label>
+                                    <select class="form-control" id="roomCount">
+                                        <option value="1+0">1+0 (Stüdyo)</option>
+                                        <option value="1+1">1+1</option>
+                                        <option value="2+1">2+1</option>
+                                        <option value="3+1" selected="selected">3+1</option>
+                                        <option value="4+1">4+1 ve Üzeri</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Bina Katı</label>
+                                    <input type="number" class="form-control" id="floorsCount" placeholder="Örn: 5" required="required">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Bulunduğu Kat</label>
+                                    <input type="text" class="form-control" id="floorLocation" placeholder="Örn: 2" required="required">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Isıtma</label>
+                                    <select class="form-control" id="heating">
+                                        <option value="Klima">Klima</option>
+                                        <option value="Doğalgaz">Doğalgaz</option>
+                                        <option value="Merkezi">Merkezi</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="font-weight-bold">Açıklama</label>
+                            <textarea class="form-control" id="description" rows="5"></textarea>
+                        </div>
+                        <div class="form-group border p-3 rounded bg-light">
+                            <label class="font-weight-bold text-dark"><i class="fas fa-camera"></i> İlan Resmi Yükle</label>
+                            <input type="file" class="form-control-file" id="imageFile" accept="image/*">
+                            <small class="text-muted">Sadece .jpg, .png veya .jpeg formatında resimler.</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block shadow-sm">
+                            <i class="fas fa-check-circle"></i> İlanı Yayınla
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-light">
+                    <h6 class="m-0 font-weight-bold text-secondary">İpuçları</h6>
+                </div>
+                <div class="card-body small text-muted">
+                    <ul>
+                        <li>Başlığın ilgi çekici olmasına dikkat edin.</li>
+                        <li>Fiyatı güncel piyasa değerine göre girin.</li>
+                        <li>Açıklama kısmında evin tüm detaylarından bahsedin.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const apiBaseUrl = "http://localhost:5155/api";
+
+        $("#propertyForm").on("submit", function (e) {
+            e.preventDefault();
+
+            // Formdaki gerçek kutulardan verileri çekiyoruz
+            const propertyData = {
+                "Title": $("#title").val().trim(),
+                "Description": $("#description").val().trim(),
+                "Price": parseFloat($("#price").val()),
+
+                // Sayısal ID'ler (HTML'deki select value'ları rakam olarak ayarlandı)
+                "CityId": parseInt($("#city").val()),
+                "DistrictId": parseInt($("#district").val()),
+                "CategoryId": parseInt($("#category").val()),
+                "SquareMeter": parseInt($("#squareMeter").val()),
+
+                // Metin Alanları
+                "RoomCount": $("#roomCount").val(),
+                "PropertyType": $("#propertyType").val(),
+                "FloorsCount": $("#floorsCount").val(),
+                "FloorLocation": $("#floorLocation").val(),
+                "Heating": $("#heating").val(),
+
+                // Resim için şimdilik varsayılan değer
+                "ImageUrl": "default.png"
+            };
+
+            console.log("Gönderilen Veri:", propertyData);
+
+            // BİLET KONTROLÜ (ÇOK ÖNEMLİ)
+            const token = localStorage.getItem("token");
+            console.log("Cebimdeki Bilet:", token);
+
+            if (!token) {
+                alert("Güvenlik hatası: Giriş biletiniz bulunamadı. Lütfen tekrar giriş yapın.");
+                window.location.href = "/Auth/Login";
+                return; // Biletsiz API'ye gitmeyi engelle
+            }
+
+            // API'ye POST isteği atıyoruz
+            $.ajax({
+                url: apiBaseUrl + "/Properties",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(propertyData),
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                       success: function (response) {
+            // 1. AŞAMA BAŞARILI: API bize yeni ilanın ID'sini gönderdi!
+            const newPropertyId = response.propertyId;
+
+            // Kullanıcı resim seçmiş mi diye bakıyoruz
+            const fileInput = document.getElementById("imageFile");
+
+            if (fileInput.files.length > 0) {
+                // 2. AŞAMA: Resim Yükleme Şovu!
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]); // Resmi pakete koyuyoruz
+
+                $.ajax({
+                    url: apiBaseUrl + "/Properties/UploadImage/" + newPropertyId,
+                    type: "POST",
+                    data: formData,
+                    processData: false, // jQuery'nin dosyayı metne çevirmesini engeller
+                    contentType: false, // jQuery'nin kendi header'ını koymasını engeller (Bunu tarayıcı otomatik yapar)
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function (imageResponse) {
+                        alert("Tebrikler! İlanınız ve resmi başarıyla yüklendi.");
+                        window.location.href = "/Admin/Index";
+                    },
+                    error: function (xhr) {
+                        alert("İlan eklendi ama resim yüklenirken bir sorun oluştu.");
+                        console.log(xhr);
+                        window.location.href = "/Admin/Index";
+                    }
+                });
+            } else {
+                // Resim seçilmemişse direkt mesaj ver ve panele dön
+                alert("Tebrikler! İlanınız (resimsiz olarak) başarıyla eklendi.");
+                window.location.href = "/Admin/Index";
+            }
+        },
+                error: function (xhr) {
+                    console.log("Tam Hata Raporu:", xhr);
+
+                    if (xhr.status === 401) {
+                        alert("Hata (401): Yetkisiz giriş! Token geçersiz veya süresi dolmuş olabilir.");
+                    } else {
+                        alert("API Hatası: " + xhr.responseText);
+                    }
+                }
+            });
+        });
+    </script>
+}

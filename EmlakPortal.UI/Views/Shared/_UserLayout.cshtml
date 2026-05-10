@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Emlak Portalı</title>
+
+    <!-- 1. TAMAMEN YEREL DOSYALAR (SB Admin 2 Klasörlerinden) -->
+    <!-- FontAwesome İkonları -->
+    <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <!-- SB Admin 2'nin kendi Bootstrap tabanlı CSS'i -->
+    <link href="~/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <!-- Sadece Vitrin İçin Ufak Tasarım Dokunuşları -->
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f8fafc;
+        }
+
+        .custom-navbar {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #4e73df !important;
+        }
+        /* SB Admin 2 Mavi Rengi */
+        .nav-link {
+            font-weight: 500;
+            color: #5a5c69 !important;
+        }
+
+            .nav-link:hover {
+                color: #4e73df !important;
+            }
+
+        .custom-footer {
+            background-color: #2c3e50;
+            color: #cbd5e1;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 2. ÜST MENÜ (Navbar) -->
+    <header class="sticky-top shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light custom-navbar py-3">
+            <div class="container">
+                <a class="navbar-brand fs-4" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-building me-2"></i>EmlakPortal
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
+                        <li class="nav-item mx-1"><a class="nav-link" asp-controller="Home" asp-action="Index">Ana Sayfa</a></li>
+                        <li class="nav-item mx-1"><a class="nav-link" asp-controller="Home" asp-action="Categories">Kategoriler</a></li>
+                        <li class="nav-item mx-1"><a class="nav-link" asp-controller="Home" asp-action="About">Hakkımızda</a></li>
+                    </ul>
+
+                    <ul class="navbar-nav ml-auto align-items-center">
+                        <li class="nav-item mx-1"><a class="nav-link text-primary font-weight-bold" asp-controller="Home" asp-action="Profile" id="UserName"></a></li>
+                        <li class="nav-item ml-2" id="liLogin">
+                            <a class="btn btn-outline-primary rounded-pill px-4" asp-controller="Auth" asp-action="Login">Giriş Yap</a>
+                        </li>
+                        <li class="nav-item ml-2" id="liRegister">
+                            <a class="btn btn-primary rounded-pill px-4" asp-controller="Auth" asp-action="Register">Üye Ol</a>
+                        </li>
+                        <li class="nav-item ml-2" id="liAdmin" style="display:none;">
+                            <a class="btn btn-warning text-dark font-weight-bold rounded-pill px-4" href="/Admin/Index">
+                                <i class="fas fa-tachometer-alt"></i> Yönetim Paneli
+                            </a>
+                        </li>
+                        <li class="nav-item ml-2">
+                            <a class="btn btn-danger rounded-pill px-4" href="#" id="Logout" style="display:none;"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 3. İÇERİK ALANI -->
+    <div class="container my-5 flex-grow-1">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- 4. ALT BİLGİ (Footer) -->
+    <footer class="custom-footer pt-4 pb-3">
+        <div class="container text-center">
+            <h5 class="text-uppercase mb-2"><i class="fas fa-building me-2"></i>Emlak Portalı</h5>
+            <p class="small mb-0">&copy; 2026 EmlakPortal. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <!-- 5. TAMAMEN YEREL JAVASCRIPT DOSYALARI (SB Admin 2 Klasörlerinden) -->
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <!-- SB Admin 2 Çekirdek JS -->
+    <script src="~/js/sb-admin-2.min.js"></script>
+
+    <!-- 6. GİRİŞ KONTROL ZEKASI (Token) -->
+    <script>
+        $(document).ready(function () {
+            // Cebimizde bilet (Token) var mı?
+            var token = localStorage.getItem("token");
+
+            if (token) {
+                // Giriş yapmışsak: Giriş ve Üye Ol butonlarını gizle, Çıkış butonunu göster
+                $("#liLogin").hide();
+                $("#liRegister").hide();
+                $("#liAdmin").show();
+                $("#Logout").show();
+                $("#UserName").html("<i class='fas fa-user-circle me-1'></i> Hesabım");
+            }
+
+            // Çıkış yapma işlemi
+            $("#Logout").click(function (e) {
+                e.preventDefault();
+                localStorage.removeItem("token"); // Bileti sil
+                window.location.href = "/Home/Index"; // Sayfayı yenile
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

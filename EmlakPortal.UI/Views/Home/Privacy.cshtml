@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Gizlilik ve Veri Güvenliği";
+}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Proje Güvenlik Altyapısı</h6>
+    </div>
+    <div class="card-body">
+        <h5>1. Kimlik Doğrulama (Authentication)</h5>
+        <p>
+            Sistemimiz, kullanıcı kimlik doğrulaması için <strong>JWT (JSON Web Token)</strong> teknolojisini kullanmaktadır.
+            Giriş yapan her kullanıcıya sunucu tarafından imzalanmış benzersiz bir token tanımlanır ve bu token tarayıcının
+            <code>localStorage</code> alanında güvenli bir şekilde saklanır.
+        </p>
+
+        <hr />
+
+        <h5>2. Veri Yetkilendirme (Authorization)</h5>
+        <p>
+            İlan ekleme, silme ve düzenleme gibi kritik işlemler sadece yetkili kullanıcılar tarafından gerçekleştirilebilir.
+            API katmanında her istek, gelen token üzerinden kontrol edilerek kullanıcının işlem yetkisi doğrulanmaktadır.
+        </p>
+
+        <hr />
+
+        <h5>3. Veritabanı Güvenliği</h5>
+        <p>
+            Kullanıcı şifreleri veritabanında asla düz metin (plain text) olarak saklanmaz. <strong>ASP.NET Core Identity</strong>
+            altyapısı kullanılarak şifreler "Hash"lenmiş bir biçimde korunmaktadır.
+        </p>
+
+        <hr />
+
+        <h5>4. Proje Hakkında</h5>
+        <p>
+            Bu platform, .NET Web API ve MVC mimarisi kullanılarak geliştirilmiş bir emlak otomasyon sistemidir.
+            Tüm veri alışverişi asenkron (AJAX) yöntemlerle sağlanarak modern bir kullanıcı deneyimi hedeflenmiştir.
+        </p>
+    </div>
+</div>

@@ -19,7 +19,7 @@ namespace EmlakPortal.API.Controllers
             _repository = repository;
         }
 
-        [HttpGet("by-city/{cityId}")]
+        [HttpGet("ByCity/{cityId}")]
         public async Task<IActionResult> GetByCity(int cityId)
         {
             var all = await _repository.GetAllAsync();

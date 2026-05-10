@@ -55,6 +55,29 @@ namespace EmlakPortal.API.Data
         .HasForeignKey(d => d.CityId)
         .OnDelete(DeleteBehavior.Cascade);
 
+            // 1. Kategorileri Tohumla
+            modelBuilder.Entity<Category>().HasData(
+                new Category { CategoryId = 1, CategoryName = "Konut" },
+                new Category { CategoryId = 2, CategoryName = "İşyeri" },
+                new Category { CategoryId = 3, CategoryName = "Arsa" },
+                new Category { CategoryId = 4, CategoryName = "Villa" }
+            );
+
+            // 2. Şehirleri Tohumla
+            modelBuilder.Entity<City>().HasData(
+                new City { CityId = 1, CityName = "İstanbul" },
+                new City { CityId = 2, CityName = "Ankara" },
+                new City { CityId = 3, CityName = "Antalya" }
+            );
+
+            // 3. İlçeleri Tohumla (CityId ile ilişkilendiriyoruz)
+            modelBuilder.Entity<District>().HasData(
+                new District { DistrictId = 1, CityId = 1, DistrictName = "Kadıköy" },
+                new District { DistrictId = 2, CityId = 1, DistrictName = "Beşiktaş" },
+                new District { DistrictId = 3, CityId = 3, DistrictName = "Muratpaşa" },
+                new District { DistrictId = 4, CityId = 3, DistrictName = "Konyaaltı" }
+            );
+
 
         }
 

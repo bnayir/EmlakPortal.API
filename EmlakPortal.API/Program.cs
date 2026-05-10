@@ -1,17 +1,17 @@
-﻿using System.Text;
+﻿using EmlakPortal.API.Data;
+using EmlakPortal.API.Mappings;
 using EmlakPortal.API.Models;
-using EmlakPortal.API.Data;
 using EmlakPortal.API.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -80,6 +80,15 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAutoMapper(typeof(MapProfile));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -89,12 +98,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
+
+app.UseCors("AllowAll"); // 1. Önce kapıyı herkese açıyoruz (CORS)
+app.UseAuthentication(); // 2. Sonra gelenlerin kimliğine bakıyoruz
+app.UseAuthorization();  // 3. Sonra yetkilerini kontrol ediyoruz
 
 app.MapControllers();
-
 app.Run();
+// BİTTİ! Başka bir şey yok.

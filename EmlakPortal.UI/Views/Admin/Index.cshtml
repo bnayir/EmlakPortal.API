@@ -1,0 +1,207 @@
+﻿@{
+    ViewData["Title"] = "Panel Özeti";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+
+    <!-- Başlık ve Tarih -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Emlak Yönetim Paneli</h1>
+        <div class="badge badge-primary p-2" id="dateBadge"></div>
+    </div>
+
+    <!-- Üst İstatistik Kartları -->
+    <div class="row">
+        <!-- Toplam İlan Kartı -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Portföy Büyüklüğü</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalCount">0</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-home fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- En Değerli İlan Kartı -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">En Değerli Mülk</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="maxPrice">0 TL</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-gem fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Şehir Sayısı Kartı -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Hizmet Verilen Şehir</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="cityCount">0</div>
+                        </div>
+                        <div class="col-auto"><i class="fas fa-map-marked-alt fa-2x text-gray-300"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aksiyon Kartı -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-gradient-success text-white shadow h-100 py-2">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <a href="/Properties/Create" class="btn btn-sm btn-light font-weight-bold text-success shadow-sm">
+                        <i class="fas fa-plus"></i> Hızlı İlan Ekle
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Veritabanından Gelen Kategori Grafiği -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary text-center">İlan Kategorileri (Veritabanı)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4" id="chartArea">
+                        <canvas id="myPieChart"></canvas>
+                    </div>
+                    <div id="noDataMessage" class="text-center d-none py-5">
+                        <i class="fas fa-database fa-3x text-gray-200 mb-3"></i>
+                        <p class="text-muted">Veritabanında analiz edilecek ilan bulunamadı.</p>
+                    </div>
+                    <div class="mt-4 text-center small" id="chartLegend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Son Eklenenler Tablosu -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Son Yayınlanan İlanlar</h6>
+                    <a href="/Properties/MyProperties" class="btn btn-sm btn-link">Tümünü Gör</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover border-bottom">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>İlan Başlığı</th>
+                                    <th>Fiyat</th>
+                                    <th>Konum</th>
+                                    <th>Detay</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentProperties">
+                                <tr><td colspan="4" class="text-center">Veriler çekiliyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/vendor/chart.js/Chart.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#dateBadge").text(new Date().toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }));
+
+            // VERİ TABANINDAN VERİ ÇEKME
+            loadDatabaseDashboard();
+
+            function loadDatabaseDashboard() {
+                var token = localStorage.getItem("token");
+                $.ajax({
+                    url: "http://localhost:5155/api/Properties/MyProperties", // Senin API adresin
+                    type: "GET",
+                    beforeSend: function (xhr) { xhr.setRequestHeader("Authorization", "Bearer " + token); },
+                    success: function (data) {
+                        if (!data || data.length === 0) {
+                            $("#chartArea").addClass("d-none");
+                            $("#noDataMessage").removeClass("d-none");
+                            $("#recentProperties").html('<tr><td colspan="4" class="text-center">Gösterilecek ilan bulunamadı.</td></tr>');
+                            return;
+                        }
+
+                        // 1. İstatistik Hesaplamaları
+                        $("#totalCount").text(data.length);
+
+                        // Fiyatları sayıya çevirip en büyüğünü bul
+                        let prices = data.map(p => parseFloat(p.price));
+                        let maxVal = Math.max(...prices);
+                        $("#maxPrice").text(maxVal.toLocaleString('tr-TR') + " TL");
+
+                        let cities = [...new Set(data.map(i => i.cityName))];
+                        $("#cityCount").text(cities.length);
+
+                        // 2. Tabloyu Doldur (Son 5)
+                        let tableRows = "";
+                        data.slice(0, 5).forEach(p => {
+                            tableRows += `<tr>
+                                <td class="font-weight-bold text-dark">${p.title}</td>
+                                <td class="text-success font-weight-bold">${parseFloat(p.price).toLocaleString('tr-TR')} TL</td>
+                                <td><i class="fas fa-map-pin text-muted mr-1"></i> ${p.cityName || '---'}</td>
+                                <td><a href="/Properties/Details/${p.propertyId}" class="btn btn-sm btn-primary btn-circle"><i class="fas fa-arrow-right"></i></a></td>
+                            </tr>`;
+                        });
+                        $("#recentProperties").html(tableRows);
+
+                        // 3. GRAFİK İÇİN VERİ GRUPLAMA (DATABASE DYNAMICS)
+                        const categoryStats = {};
+                        data.forEach(item => {
+                            const catName = item.categoryName || "Kategorisiz";
+                            categoryStats[catName] = (categoryStats[catName] || 0) + 1;
+                        });
+
+                        // Grafiği çiz
+                        drawDynamicChart(Object.keys(categoryStats), Object.values(categoryStats));
+                    }
+                });
+            }
+
+            function drawDynamicChart(labels, values) {
+                var ctx = document.getElementById("myPieChart");
+                const colors = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'];
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: colors,
+                            hoverBorderColor: "rgba(234, 236, 244, 1)",
+                        }],
+                    },
+                    options: { maintainAspectRatio: false, legend: { display: false }, cutoutPercentage: 75 }
+                });
+
+                // Grafik altı açıklamalarını dinamik oluştur
+                let legendHtml = "";
+                labels.forEach((label, i) => {
+                    legendHtml += `<span class="mr-2"><i class="fas fa-circle" style="color:${colors[i]}"></i> ${label}</span>`;
+                });
+                $("#chartLegend").html(legendHtml);
+            }
+        });
+    </script>
+}

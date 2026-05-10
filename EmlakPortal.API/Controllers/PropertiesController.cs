@@ -1,8 +1,10 @@
-﻿using EmlakPortal.API.DTOs; 
+﻿using AutoMapper;
+using EmlakPortal.API.DTOs;
 using EmlakPortal.API.Models;
 using EmlakPortal.API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using static EmlakPortal.API.Models.Property;
 
 namespace EmlakPortal.API.Controllers
@@ -12,79 +14,72 @@ namespace EmlakPortal.API.Controllers
     public class PropertiesController : ControllerBase
     {
         private readonly PropertyRepository _repository;
+        private readonly IMapper _mapper;
 
-        public PropertiesController(PropertyRepository repository)
+        public PropertiesController(PropertyRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetProperties()
         {
             var properties = await _repository.GetPropertiesWithDetailsAsync();
-
-            var dtoList = properties.Select(p => new PropertyDto
-            {
-                PropertyId = p.PropertyId,
-                Title = p.Title,
-                Description = p.Description,
-                Price = p.Price,
-                CategoryId = p.CategoryId,
-                CityId = p.CityId,
-
-                CategoryName = p.Category?.CategoryName,
-                CityName = p.City?.CityName
-            }).ToList();
-
+            var dtoList = _mapper.Map<List<PropertyDto>>(properties);
             return Ok(dtoList);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProperty(int id)
         {
-            var property = await _repository.GetById(id);
+            // YENİ KOD: Tüm detaylarıyla (Şehir, İlçe isimleri vs.) birlikte çekiyoruz ki "undefined" yazmasın!
+            var properties = await _repository.GetPropertiesWithDetailsAsync();
+            var property = properties.FirstOrDefault(p => p.PropertyId == id);
+
             if (property == null) return NotFound("İlan bulunamadı.");
-            return Ok(property);
+
+            var dto = _mapper.Map<PropertyDto>(property);
+            return Ok(dto);
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> PostProperty(PropertyDto dto)
+        public async Task<IActionResult> PostProperty(PropertyCreateDto dto)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            var property = new Property
-            {
-                Title = dto.Title,
-                Price = dto.Price,
-                Description = dto.Description,
-                CategoryId = dto.CategoryId,
-                AppUserId = userId,
+            var property = _mapper.Map<Property>(dto);
+            property.AppUserId = userId;
+            property.Status = PropertyStatus.Approved;
+            property.IsActive = true;
+            property.CreatedDate = DateTime.Now;
 
-            };
             await _repository.AddAsync(property);
-            return Ok("İlan başarıyla eklendi.");
+            return Ok(new { message = "İlan başarıyla eklendi.", propertyId = property.PropertyId });
         }
-
-        
-
-        
 
         [Authorize]
         [HttpGet("MyProperties")]
         public async Task<IActionResult> GetMyProperties()
         {
             var properties = await _repository.GetAllWithDetailsAsync();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var approvedList = properties.Where(p => p.Status == PropertyStatus.Approved).Select(p => new
-            {
-                p.PropertyId,
-                p.Title,
-                StatusName = p.Status.ToString()
-            });
+            var myProperties = properties
+                .Where(p => p.AppUserId == userId && p.Status == PropertyStatus.Approved)
+                .Select(p => new
+                {
+                    p.PropertyId,
+                    p.Title,
+                    p.Price,       // Eksik olan Fiyat eklendi!
+                    p.ImageUrl,    // Admin panelinde resim göstermek için eklendi
+                    p.CreatedDate, // Tarih göstermek için eklendi
+                    StatusName = p.Status.ToString()
+                });
 
-            return Ok(approvedList);
+            return Ok(myProperties);
         }
 
         [HttpGet("Search")]
@@ -95,18 +90,19 @@ namespace EmlakPortal.API.Controllers
 
             if (!string.IsNullOrEmpty(filter.Keyword))
             {
-                query = query.Where(p => p.Title.Contains(filter.Keyword)||
+                query = query.Where(p => p.Title.Contains(filter.Keyword) ||
                                           p.Description.Contains(filter.Keyword));
             }
 
             if (filter.CityId.HasValue)
                 query = query.Where(p => p.CityId == filter.CityId.Value);
 
+            // MANTIK HATASI DÜZELTİLDİ: Artık == yerine >= ve <= kullanıyoruz!
             if (filter.MinPrice.HasValue)
-                query = query.Where(p => p.Price == filter.MinPrice.Value);
+                query = query.Where(p => p.Price >= filter.MinPrice.Value);
 
             if (filter.MaxPrice.HasValue)
-                query = query.Where(p => p.Price == filter.MaxPrice.Value);
+                query = query.Where(p => p.Price <= filter.MaxPrice.Value);
 
             if (!string.IsNullOrEmpty(filter.SortBy))
             {
@@ -119,20 +115,13 @@ namespace EmlakPortal.API.Controllers
                 };
             }
 
-            var result = query.Select(p => new
-            {
-                p.PropertyId,
-                p.Title,
-                p.Price,
-                p.CityId,
-                p.CategoryId,
-            }).ToList();
+            var result = _mapper.Map<List<PropertyDto>>(query.ToList());
 
             if (!result.Any()) return NotFound("İlan Bulunamadı.");
             return Ok(result);
         }
 
-        [Authorize] 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProperty(int id)
         {
@@ -142,7 +131,7 @@ namespace EmlakPortal.API.Controllers
                 return NotFound("Böyle bir ilan bulunamadı.");
             }
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (property.AppUserId != userId)
             {
@@ -150,12 +139,8 @@ namespace EmlakPortal.API.Controllers
             }
 
             await _repository.DeleteAsync(id);
-
             return Ok("İlan başarıyla silindi.");
         }
-
-        
-       
 
         [Authorize]
         [HttpPut]
@@ -165,16 +150,11 @@ namespace EmlakPortal.API.Controllers
             if (property == null)
                 return NotFound("İlan bulunamadı.");
 
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (property.AppUserId != userId)
                 return Unauthorized("Sadece kendi ilanlarınızı güncelleyebilirsiniz!");
 
-            property.Title = dto.Title;
-            property.Description = dto.Description;
-            property.Price = dto.Price;
-            property.CategoryId = dto.CategoryId;
-            property.CityId = dto.CityId;
-
+            _mapper.Map(dto, property);
             await _repository.UpdateAsync(property);
 
             return Ok("İlan başarıyla güncellendi.");
@@ -192,7 +172,6 @@ namespace EmlakPortal.API.Controllers
 
             var extension = Path.GetExtension(file.FileName);
             var newImageName = Guid.NewGuid() + extension;
-
             var location = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/", newImageName);
 
             using (var stream = new FileStream(location, FileMode.Create))
@@ -200,9 +179,11 @@ namespace EmlakPortal.API.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            return Ok(new { Message = "Resim başarıyla yüklendi", ImageUrl = "/images/" + newImageName });
+            // EKSİK OLAN KISIM TAMAMLANDI: Resmi veritabanına kaydediyoruz!
+            property.ImageUrl = "/images/" + newImageName;
+            await _repository.UpdateAsync(property);
+
+            return Ok(new { Message = "Resim başarıyla yüklendi", ImageUrl = property.ImageUrl });
         }
     }
-
-       
-    }
+}

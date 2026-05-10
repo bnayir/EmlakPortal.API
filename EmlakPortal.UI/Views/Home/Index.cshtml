@@ -1,0 +1,206 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+    // Layout = "_UserLayout"; yazmamıza gerek yok, _ViewStart hallediyor!
+}
+
+<style>
+    /* İlan Kartlarına Özel Modern Efektler */
+    .property-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+    .property-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(15, 23, 42, 0.85);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .price-tag {
+        color: #2563eb; /* Dikkat çekici bir mavi */
+        font-weight: 800;
+        font-size: 1.4rem;
+    }
+
+    /* Üstteki Karşılama Alanı */
+    .hero-section {
+        background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+        color: white;
+        padding: 60px 0 80px 0;
+        border-radius: 15px;
+        margin-top: 10px;
+    }
+
+    /* Filtreleme Kutusu (Yukarı Taştı Efekti) */
+    .filter-box {
+        margin-top: -50px;
+        border-radius: 15px;
+        position: relative;
+        z-index: 10;
+    }
+</style>
+
+<!-- KARŞILAMA ALANI (HERO) -->
+<div class="hero-section text-center shadow">
+    <h1 class="fw-bold display-5 mb-3">Hayalinizdeki Evi Keşfedin</h1>
+    <p class="lead opacity-75">Binlerce güncel satılık ve kiralık ilan arasından size en uygun olanı bulun.</p>
+</div>
+
+<!-- FİLTRELEME ALANI -->
+<div class="card shadow-lg border-0 filter-box mx-auto w-100" style="max-width: 1000px;">
+    <div class="card-body p-4 p-md-5">
+        <form id="searchForm" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-muted small">Anahtar Kelime</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" class="form-control bg-light border-start-0" id="keyword" placeholder="Örn: Dubleks, Bahçeli...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-muted small">Şehir</label>
+                <select class="form-select bg-light" id="citySelect">
+                    <option value="">Tüm Şehirler</option>
+                    <option value="Antalya">Antalya</option>
+                    <option value="İstanbul">İstanbul</option>
+                    <option value="Ankara">Ankara</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-muted small">Kategori</label>
+                <select class="form-select bg-light" id="categorySelect">
+                    <option value="">Tüm Kategoriler</option>
+                    <option value="Konut">Konut</option>
+                    <option value="İşyeri">İşyeri</option>
+                    <option value="Arsa">Arsa</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary w-100 py-2 fw-bold" onclick="filterProperties()">
+                    <i class="fas fa-filter me-2"></i>Filtrele
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- İLANLAR VİTRİNİ -->
+<div class="mt-5 pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-dark mb-0">Güncel İlanlar</h3>
+        <span class="text-muted small" id="resultCount">Yükleniyor...</span>
+    </div>
+
+    <!-- İlan Kartlarının Geleceği Konteyner -->
+    <div class="row g-4" id="listingsContainer">
+
+        <!-- Yükleniyor Animasyonu (API'den veri gelene kadar görünür) -->
+        <div class="col-12 text-center py-5" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2 text-muted">İlanlar getiriliyor...</p>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // API Adresini kendi backend portuna göre ayarla (Örn: 5155)
+        const apiBaseUrl = "http://localhost:5155/api";
+
+        $(document).ready(function () {
+            // Sayfa açıldığında tüm ilanları getir
+            fetchProperties();
+        });
+
+        // İlanları çeken fonksiyon
+        function fetchProperties() {
+            // $("#loadingSpinner").show();
+            // $("#listingsContainer").empty().append($("#loadingSpinner"));
+
+            // ÖRNEK: API'ye istek atma kodu (Şu an API çalışmadığı için örnek veri gösterelim ki tasarımı gör)
+
+            /* Gerçek kodun böyle olacak:
+            $.get(`${apiBaseUrl}/Properties`, function (data) {
+                renderListings(data);
+            }).fail(function() {
+                $("#listingsContainer").html('<div class="col-12 text-center text-danger">İlanlar yüklenirken bir hata oluştu!</div>');
+            });
+            */
+
+            // Tasarımı görebilmen için DUMMY (Sahte) Veri üretiyorum:
+            const dummyData = [
+                { id: 1, title: "Konyaaltı'nda Deniz Manzaralı 3+1 Lüks Daire", price: 4500000, city: "Antalya", district: "Konyaaltı", category: "Konut", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
+                { id: 2, title: "Merkezde Yatırımlık Dükkan", price: 8500000, city: "İstanbul", district: "Şişli", category: "İşyeri", image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" },
+                { id: 3, title: "Kepez'de Satılık İmarlı Arsa", price: 1200000, city: "Antalya", district: "Kepez", category: "Arsa", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }
+            ];
+
+            setTimeout(() => renderListings(dummyData), 500); // Yarım saniye yükleniyor efekti
+        }
+
+        // Gelen veriyi ekrana çizen fonksiyon
+        function renderListings(data) {
+            const container = $("#listingsContainer");
+            container.empty();
+
+            if (!data || data.length === 0) {
+                container.html(`
+                    <div class="col-12">
+                        <div class="alert alert-info text-center py-4 rounded-3 border-0 shadow-sm">
+                            <i class="fas fa-search fa-2x mb-3 text-info opacity-50"></i>
+                            <h5 class="fw-bold">Aranan kriterlere uygun ilan bulunamadı.</h5>
+                            <p class="mb-0 text-muted">Lütfen filtreleri değiştirerek tekrar deneyin.</p>
+                        </div>
+                    </div>
+                `);
+                $("#resultCount").text("0 İlan");
+                return;
+            }
+
+            $("#resultCount").text(`${data.length} İlan Bulundu`);
+
+            data.forEach(item => {
+                const cardHtml = `
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm property-card">
+                            <div class="position-relative">
+                                <img src="${item.image}" class="card-img-top" alt="${item.title}" style="height: 220px; object-fit: cover;">
+                                <div class="property-badge">${item.category}</div>
+                            </div>
+                            <div class="card-body p-4">
+                                <h5 class="card-title fw-bold text-truncate" title="${item.title}">${item.title}</h5>
+                                <div class="price-tag mb-3">${item.price.toLocaleString('tr-TR')} ₺</div>
+                                <div class="d-flex text-muted small mb-4">
+                                    <div class="me-3"><i class="fas fa-map-marker-alt text-primary me-1"></i> ${item.city} / ${item.district}</div>
+                                </div>
+                                <a href="/Properties/Details/${item.id}" class="btn btn-outline-primary w-100 fw-bold rounded-pill">
+                                    İlanı İncele <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.append(cardHtml);
+            });
+        }
+
+        function filterProperties() {
+            alert("Filtreleme kodları API ile bağlandığında çalışacak!");
+            // Burada formdaki değerleri alıp API'ye query string olarak göndereceksin.
+        }
+    </script>
+}

@@ -11,7 +11,8 @@ using System.Text;
 
 namespace EmlakPortal.API.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    // 1. DÜZELTME: [action] kısmını kaldırdık!
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -38,11 +39,13 @@ namespace EmlakPortal.API.Controllers
 
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "Admin"); 
+               // await _userManager.AddToRoleAsync(user, "Admin");
                 return Ok("Kullanıcı başarıyla oluşturuldu.");
             }
-            return BadRequest(result.Errors); 
-            await _userManager.AddToRoleAsync(user, "Admin");
+
+            // 2. DÜZELTME: Altta kalan ölü kodu sildik. 
+            // Çünkü return dedikten sonra alt satırlar zaten okunmaz.
+            return BadRequest(result.Errors);
         }
 
         [HttpPost("Login")]
@@ -53,11 +56,11 @@ namespace EmlakPortal.API.Controllers
             if (user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
                 var authClaims = new List<Claim>
-{
-    new Claim(ClaimTypes.Name, user.UserName),
-    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
-    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-};
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                };
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuCokGizliVeUzunBirAnahtarCumlesiOlmalidir12345!"));
 
@@ -78,5 +81,4 @@ namespace EmlakPortal.API.Controllers
             return Unauthorized("Kullanıcı adı veya şifre hatalı.");
         }
     }
-
 }

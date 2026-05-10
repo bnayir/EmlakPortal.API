@@ -42,6 +42,32 @@ namespace EmlakPortal.API.Migrations
                     b.HasIndex("CityId");
 
                     b.ToTable("District");
+
+                    b.HasData(
+                        new
+                        {
+                            DistrictId = 1,
+                            CityId = 1,
+                            DistrictName = "Kadıköy"
+                        },
+                        new
+                        {
+                            DistrictId = 2,
+                            CityId = 1,
+                            DistrictName = "Beşiktaş"
+                        },
+                        new
+                        {
+                            DistrictId = 3,
+                            CityId = 3,
+                            DistrictName = "Muratpaşa"
+                        },
+                        new
+                        {
+                            DistrictId = 4,
+                            CityId = 3,
+                            DistrictName = "Konyaaltı"
+                        });
                 });
 
             modelBuilder.Entity("EmlakPortal.API.Models.AppRole", b =>
@@ -159,6 +185,32 @@ namespace EmlakPortal.API.Migrations
                     b.HasKey("CategoryId");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryId = 1,
+                            CategoryName = "Konut",
+                            Status = false
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            CategoryName = "İşyeri",
+                            Status = false
+                        },
+                        new
+                        {
+                            CategoryId = 3,
+                            CategoryName = "Arsa",
+                            Status = false
+                        },
+                        new
+                        {
+                            CategoryId = 4,
+                            CategoryName = "Villa",
+                            Status = false
+                        });
                 });
 
             modelBuilder.Entity("EmlakPortal.API.Models.City", b =>
@@ -176,6 +228,23 @@ namespace EmlakPortal.API.Migrations
                     b.HasKey("CityId");
 
                     b.ToTable("City");
+
+                    b.HasData(
+                        new
+                        {
+                            CityId = 1,
+                            CityName = "İstanbul"
+                        },
+                        new
+                        {
+                            CityId = 2,
+                            CityName = "Ankara"
+                        },
+                        new
+                        {
+                            CityId = 3,
+                            CityName = "Antalya"
+                        });
                 });
 
             modelBuilder.Entity("EmlakPortal.API.Models.Favorite", b =>
