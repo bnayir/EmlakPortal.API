@@ -8,5 +8,9 @@ namespace EmlakPortal.UI.Controllers
         {
             return View();
         }
+        public IActionResult Messages()
+        {
+            return View();
+        }
     }
 }

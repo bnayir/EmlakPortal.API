@@ -11,7 +11,6 @@ using System.Text;
 
 namespace EmlakPortal.API.Controllers
 {
-    // 1. DÜZELTME: [action] kısmını kaldırdık!
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -39,12 +38,10 @@ namespace EmlakPortal.API.Controllers
 
             if (result.Succeeded)
             {
-               // await _userManager.AddToRoleAsync(user, "Admin");
+                // await _userManager.AddToRoleAsync(user, "Admin");
                 return Ok("Kullanıcı başarıyla oluşturuldu.");
             }
 
-            // 2. DÜZELTME: Altta kalan ölü kodu sildik. 
-            // Çünkü return dedikten sonra alt satırlar zaten okunmaz.
             return BadRequest(result.Errors);
         }
 
@@ -79,6 +76,46 @@ namespace EmlakPortal.API.Controllers
                 });
             }
             return Unauthorized("Kullanıcı adı veya şifre hatalı.");
+        }
+
+
+        [Authorize] 
+        [HttpGet("Me")]
+        public async Task<IActionResult> GetMe()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound("Kullanıcı bulunamadı.");
+
+            return Ok(new
+            {
+                userName = user.UserName,
+                email = user.Email,
+                fullName = user.FullName
+            });
+        }
+
+        [Authorize]
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound("Kullanıcı bulunamadı.");
+
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return Ok("Şifreniz başarıyla güncellendi.");
+            }
+
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return BadRequest(errors);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace EmlakPortal.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendMessage(MessageDto dto)
+        public async Task<IActionResult> SendMessage(MessageDTO dto)
         {
             var senderId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(senderId))
@@ -59,13 +59,12 @@ namespace EmlakPortal.API.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
+
             var allMessages = await _repository.GetAllAsync();
-            var outbox = allMessages.Where(m => m.ReceiverId == userId)
-                                   .Select(m => new { m.MessageId, m.SenderId, m.PropertyId, m.Text, m.SendDate })
+            var outbox = allMessages.Where(m => m.SenderId == userId)
+                                   .Select(m => new { m.MessageId, m.ReceiverId, m.PropertyId, m.Text, m.SendDate })
                                    .OrderByDescending(m => m.SendDate).ToList();
             return Ok(outbox);
-
-
         }
     }
 }

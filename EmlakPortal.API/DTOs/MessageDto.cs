@@ -1,9 +1,9 @@
 ﻿namespace EmlakPortal.API.DTOs
 {
-    public class MessageDto
+    public class MessageDTO
     {
-        public int PropertyId { get; set; }
         public string ReceiverId { get; set; }
+        public int PropertyId { get; set; }
         public string Text { get; set; }
     }
 }

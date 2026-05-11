@@ -2,6 +2,7 @@
     ViewData["Title"] = "İlan Detayı";
     Layout = "_UserLayout";
 }
+
 <div class="container mt-5 mb-5" id="detailContainer">
     <div class="text-center py-5" id="loadingSpinner">
         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
@@ -9,22 +10,44 @@
     </div>
 </div>
 
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-paper-plane"></i> Satıcıya Mesaj Gönder</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Kapat">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <textarea id="msgContent" class="form-control" rows="5" placeholder="İlan hakkında sormak istediklerinizi yazın..."></textarea>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                <button type="button" onclick="submitMessage()" class="btn btn-success px-4"><i class="fas fa-check"></i> Mesajı Gönder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         const apiBaseUrl = "http://localhost:5155/api";
         const propertyId = window.location.pathname.split('/').pop();
-
         const token = localStorage.getItem("token");
+        let propertyOwnerId = "";
 
         $(document).ready(function () {
             $.ajax({
                 url: apiBaseUrl + "/Properties/" + propertyId,
                 type: "GET",
                 success: function (data) {
+                    propertyOwnerId = data.appUserId;
+
                     renderDetails(data);
                 },
                 error: function () {
-                    $("#detailContainer").html(`<div class="alert alert-danger text-center"><h4><i class="fas fa-exclamation-triangle"></i> İlan bulunamadı veya yayından kaldırılmış.</h4></div>`);
+                    $("#detailContainer").html(`<div class="alert alert-danger text-center"><h4><i class="fas fa-exclamation-triangle"></i> İlan bulunamadı.</h4></div>`);
                 }
             });
         });
@@ -80,8 +103,8 @@
                                     </li>
                                 </ul>
 
-                                <button class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm mb-2">
-                                    <i class="fas fa-phone-alt"></i> Satıcıyı Ara
+                                <button class="btn btn-primary btn-lg btn-block font-weight-bold shadow-sm mb-2" data-toggle="modal" data-target="#messageModal">
+                                    <i class="fas fa-envelope"></i> Mesaj Gönder
                                 </button>
 
                                 <button id="btnFavorite" onclick="addToFavorites()" class="btn btn-outline-danger btn-block font-weight-bold">
@@ -107,10 +130,10 @@
              };
 
              $.ajax({
-                 url: apiBaseUrl + "/Favorites", 
+                 url: apiBaseUrl + "/Favorites",
                  type: "POST",
-                 contentType: "application/json", 
-                 data: JSON.stringify(favoriteData), 
+                 contentType: "application/json",
+                 data: JSON.stringify(favoriteData),
                  headers: {
                      "Authorization": "Bearer " + token
                  },
@@ -123,6 +146,41 @@
                  }
              });
          }
-        
+
+        function submitMessage() {
+             if (!token) {
+                 alert("Mesaj göndermek için lütfen önce giriş yapın.");
+                 $('#messageModal').modal('hide');
+                 window.location.href = "/Auth/Login";
+                 return;
+             }
+
+             const messageData = {
+                 ReceiverId: propertyOwnerId,
+                 PropertyId: parseInt(propertyId),
+                 Text: $("#msgContent").val().trim()
+             };
+
+             if (messageData.Text === "") {
+                 alert("Lütfen boş mesaj göndermeyin.");
+                 return;
+             }
+
+             $.ajax({
+                 url: apiBaseUrl + "/Messages",
+                 type: "POST",
+                 contentType: "application/json",
+                 data: JSON.stringify(messageData),
+                 headers: { "Authorization": "Bearer " + token },
+                 success: function() {
+                     alert("Mesajınız başarıyla satıcıya iletildi!");
+                     $('#messageModal').modal('hide');
+                     $("#msgContent").val("");
+                 },
+                 error: function(xhr) {
+                     alert("Mesaj gönderilemedi: " + xhr.responseText);
+                 }
+             });
+         }
     </script>
 }

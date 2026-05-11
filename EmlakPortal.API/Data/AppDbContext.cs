@@ -1,7 +1,8 @@
-﻿using EmlakPortal.API.Models;
+﻿using EmlakPortal.API.DTOs;
+using EmlakPortal.API.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace EmlakPortal.API.Data
 {

@@ -33,7 +33,6 @@ namespace EmlakPortal.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProperty(int id)
         {
-            // YENİ KOD: Tüm detaylarıyla (Şehir, İlçe isimleri vs.) birlikte çekiyoruz ki "undefined" yazmasın!
             var properties = await _repository.GetPropertiesWithDetailsAsync();
             var property = properties.FirstOrDefault(p => p.PropertyId == id);
 
@@ -73,9 +72,9 @@ namespace EmlakPortal.API.Controllers
                 {
                     p.PropertyId,
                     p.Title,
-                    p.Price,       // Eksik olan Fiyat eklendi!
-                    p.ImageUrl,    // Admin panelinde resim göstermek için eklendi
-                    p.CreatedDate, // Tarih göstermek için eklendi
+                    p.Price,       
+                    p.ImageUrl,    
+                    p.CreatedDate, 
                     StatusName = p.Status.ToString()
                 });
 
@@ -97,7 +96,6 @@ namespace EmlakPortal.API.Controllers
             if (filter.CityId.HasValue)
                 query = query.Where(p => p.CityId == filter.CityId.Value);
 
-            // MANTIK HATASI DÜZELTİLDİ: Artık == yerine >= ve <= kullanıyoruz!
             if (filter.MinPrice.HasValue)
                 query = query.Where(p => p.Price >= filter.MinPrice.Value);
 
@@ -179,7 +177,6 @@ namespace EmlakPortal.API.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            // EKSİK OLAN KISIM TAMAMLANDI: Resmi veritabanına kaydediyoruz!
             property.ImageUrl = "/images/" + newImageName;
             await _repository.UpdateAsync(property);
 

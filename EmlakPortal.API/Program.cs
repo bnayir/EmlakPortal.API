@@ -102,10 +102,9 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseCors("AllowAll"); // 1. Önce kapıyı herkese açıyoruz (CORS)
-app.UseAuthentication(); // 2. Sonra gelenlerin kimliğine bakıyoruz
-app.UseAuthorization();  // 3. Sonra yetkilerini kontrol ediyoruz
+app.UseCors("AllowAll"); 
+app.UseAuthentication(); 
+app.UseAuthorization();  
 
 app.MapControllers();
 app.Run();
-// BİTTİ! Başka bir şey yok.
