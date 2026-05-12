@@ -58,8 +58,7 @@
 
                                     <td>${m.text}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i> Sil</button>
-                                    </td>
+        <button onclick="deleteMessage(${m.messageId})" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i> Sil</button>                                    </td>
                                 </tr>
                             `;
                         });
@@ -72,5 +71,21 @@
             });
        
         });
+        function deleteMessage(messageId) {
+            if (confirm("Bu mesajı kalıcı olarak silmek istediğinize emin misiniz?")) {
+                $.ajax({
+                    url: apiBaseUrl + "/Messages/" + messageId,
+                    type: "DELETE",
+                    headers: { "Authorization": "Bearer " + token },
+                    success: function () {
+                        alert("Mesaj başarıyla silindi.");
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        alert("Silme işlemi başarısız: " + xhr.responseText);
+                    }
+                });
+            }
+        }
     </script>
 }

@@ -75,7 +75,10 @@ namespace EmlakPortal.API.Controllers
                     p.Price,       
                     p.ImageUrl,    
                     p.CreatedDate, 
-                    StatusName = p.Status.ToString()
+                    StatusName = p.Status.ToString(),
+                    p.PropertyType,
+                    CityName = p.City != null ? p.City.CityName : "Bilinmiyor",
+                    CategoryName = p.Category != null ? p.Category.CategoryName : "Kategorisiz"
                 });
 
             return Ok(myProperties);

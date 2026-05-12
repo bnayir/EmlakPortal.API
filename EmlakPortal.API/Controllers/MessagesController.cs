@@ -66,5 +66,23 @@ namespace EmlakPortal.API.Controllers
                                    .OrderByDescending(m => m.SendDate).ToList();
             return Ok(outbox);
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMessage(int id)
+        {
+            var message = await _repository.GetByIdAsync(id);
+            if (message == null)
+            {
+                return NotFound("Silinecek mesaj bulunamadı.");
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (message.ReceiverId != userId)
+            {
+                return Unauthorized("Sadece size gelen mesajları silebilirsiniz.");
+            }
+
+            await _repository.DeleteAsync(id);
+            return Ok("Mesaj başarıyla silindi.");
+        }
     }
 }

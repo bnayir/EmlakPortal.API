@@ -184,8 +184,7 @@
             $("#resultCount").text(`${data.length} İlan Bulundu`);
 
             data.forEach(item => {
-                const imageUrl = item.imageUrl ? item.imageUrl : "/images/default.png";
-
+        const imageUrl = item.imageUrl ? item.imageUrl : "/images/default.png";
                 const cardHtml = `
                     <div class="col-lg-4 col-md-6">
                         <div class="card h-100 border-0 shadow-sm property-card">

@@ -8,9 +8,11 @@ namespace EmlakPortal.API.Mappings
     {
         public MapProfile()
         {
-            
-            CreateMap<Property, PropertyDto>().ReverseMap();
-            CreateMap<PropertyCreateDto, Property>();
+
+            CreateMap<Property, PropertyDto>()
+                .ForMember(dest => dest.CityName, opt => opt.MapFrom(src => src.City.CityName))
+                .ForMember(dest => dest.DistrictName, opt => opt.MapFrom(src => src.District.DistrictName))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName)); CreateMap<PropertyCreateDto, Property>();
 
             CreateMap<Property, PropertyUpdateDto>().ReverseMap();
 

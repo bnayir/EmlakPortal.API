@@ -68,7 +68,7 @@
         <div class="col-xl-4 col-lg-5">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary text-center">İlan Kategorileri (Veritabanı)</h6>
+                    <h6 class="m-0 font-weight-bold text-primary text-center">İlan Kategorileri </h6>
                 </div>
                 <div class="card-body">
                     <div class="chart-pie pt-4" id="chartArea">
@@ -143,14 +143,24 @@
                         $("#cityCount").text(cities.length);
 
                         let tableRows = "";
-                        data.slice(0, 5).forEach(p => {
-                            tableRows += `<tr>
-                                <td class="font-weight-bold text-dark">${p.title}</td>
-                                <td class="text-success font-weight-bold">${parseFloat(p.price).toLocaleString('tr-TR')} TL</td>
-                                <td><i class="fas fa-map-pin text-muted mr-1"></i> ${p.cityName || '---'}</td>
-                                <td><a href="/Properties/Details/${p.propertyId}" class="btn btn-sm btn-primary btn-circle"><i class="fas fa-arrow-right"></i></a></td>
-                            </tr>`;
-                        });
+                                data.slice(0, 5).forEach(p => {
+            let badgeColor = (p.categoryName && p.categoryName.toLowerCase().includes("satılık")) ? "badge-danger" : "badge-success";
+
+            tableRows += `<tr>
+                <td>
+                    <div class="font-weight-bold text-dark" style="font-size: 1.1rem;">${p.title}</div>
+                    <span class="badge ${badgeColor} px-2 py-1 mt-1 shadow-sm"><i class="fas fa-tag"></i> ${p.categoryName || 'Bilinmiyor'}</span>
+                    <span class="badge badge-secondary px-2 py-1 mt-1 shadow-sm"><i class="fas fa-home"></i> ${p.propertyType || 'Ev'}</span>
+                </td>
+                <td class="text-success font-weight-bold align-middle">${parseFloat(p.price).toLocaleString('tr-TR')} TL</td>
+                <td class="align-middle"><i class="fas fa-map-pin text-muted mr-1"></i> ${p.cityName || 'Bilinmiyor'}</td>
+                <td class="align-middle">
+                    <a href="/Properties/Details/${p.propertyId}" class="btn btn-sm btn-primary btn-circle shadow-sm" title="İlan Detayına Git">
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </td>
+            </tr>`;
+        });
                         $("#recentProperties").html(tableRows);
 
                         const categoryStats = {};
