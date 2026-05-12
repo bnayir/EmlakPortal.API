@@ -137,30 +137,50 @@
              $("#detailContainer").html(html);
          }
 
-        function addToFavorites() {
-             if (!token) {
-                 Toast.fire({ icon: 'warning', title: 'Uyarı', text: 'Favorilere eklemek için önce giriş yapmalısınız.' });
-                 setTimeout(() => { window.location.href = "/Auth/Login"; }, 1500);
-                 return;
-             }
+               function addToFavorites() {
+            if (!token) {
+                Toast.fire({
+                    icon: 'warning',
+                    title: 'Oturum Gerekli',
+                    text: 'Favorilere eklemek için önce giriş yapmalısınız.'
+                });
+                setTimeout(() => { window.location.href = "/Auth/Login"; }, 1500);
+                return;
+            }
 
-             const favoriteData = { PropertyId: parseInt(propertyId) };
+            const favoriteData = {
+                PropertyId: parseInt(propertyId)
+            };
 
-             $.ajax({
-                 url: apiBaseUrl + "/Favorites",
-                 type: "POST",
-                 contentType: "application/json",
-                 data: JSON.stringify(favoriteData),
-                 headers: { "Authorization": "Bearer " + token },
-                 success: function () {
-                     Toast.fire({ icon: 'success', title: 'Harika!', text: 'İlan favorilerinize eklendi.' });
-                     $("#btnFavorite").removeClass("btn-outline-danger").addClass("btn-danger text-white").html('<i class="fas fa-heart"></i> Favorilerinizde');
-                 },
-                 error: function (xhr) {
-                     Toast.fire({ icon: 'info', title: 'Bilgi', text: 'Bu ilan zaten favorilerinizde olabilir.' });
-                 }
-             });
-         }
+            $.ajax({
+                url: apiBaseUrl + "/Favorites",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(favoriteData),
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                success: function () {
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Favorilere Eklendi!',
+                        text: 'Bu ilanı artık favorilerim sayfasında görebilirsiniz.'
+                    });
+
+                    $("#btnFavorite")
+                        .removeClass("btn-outline-danger")
+                        .addClass("btn-danger text-white")
+                        .html('<i class="fas fa-heart"></i> Favorilerinizde');
+                },
+                error: function (xhr) {
+                    Toast.fire({
+                        icon: 'info',
+                        title: 'Bilgi',
+                        text: 'Bu ilan zaten favori listenizde bulunuyor.'
+                    });
+                }
+            });
+        }
 
         function submitMessage() {
              if (!token) {

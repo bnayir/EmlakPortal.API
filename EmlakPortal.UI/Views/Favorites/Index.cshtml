@@ -10,8 +10,11 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         const apiBaseUrl = "http://localhost:5155/api";
+        const serverBaseUrl = "http://localhost:5155";
         const token = localStorage.getItem("token");
 
         $(document).ready(function () {
@@ -23,25 +26,29 @@
                 headers: { "Authorization": "Bearer " + token },
                 success: function (data) {
                     let html = "";
-                    
-                    if(data.length === 0) {
+
+                    if(!data || data.length === 0) {
                         html = '<div class="col-12 text-center py-5"><i class="far fa-heart fa-3x text-muted mb-3"></i><h5>Henüz favori ilanınız yok.</h5></div>';
                     } else {
                         data.forEach(item => {
+                            const imageUrl = (item.imageUrl && item.imageUrl.length > 5)
+                                             ? serverBaseUrl + item.imageUrl
+                                             : "/images/default.png";
+
                             html += `
                                 <div class="col-md-4 mb-4" id="fav-row-${item.favoriteId}">
                                     <div class="card h-100 shadow-sm border-0">
-                                        <img src="${item.imageUrl || '/images/default.png'}" class="card-img-top" style="height:200px; object-fit:cover;">
+                                        <img src="${imageUrl}" class="card-img-top" style="height:200px; object-fit:cover;">
                                         <div class="card-body">
                                             <h5 class="fw-bold text-truncate" title="${item.title}">${item.title}</h5>
                                             <p class="text-success fw-bold" style="font-size: 1.2rem;">${item.price ? item.price.toLocaleString('tr-TR') : '0'} TL</p>
 
                                             <div class="d-flex justify-content-between mt-3">
-                                                <a href="/Properties/Details/${item.propertyId}" class="btn btn-sm btn-outline-primary">
+                                                <a href="/Properties/Details/${item.propertyId}" class="btn btn-sm btn-outline-primary shadow-sm">
                                                     <i class="fas fa-eye"></i> Detay
                                                 </a>
 
-                                                <button onclick="removeFromFavorites(${item.favoriteId})" class="btn btn-sm btn-outline-danger">
+                                                <button onclick="removeFromFavorites(${item.favoriteId})" class="btn btn-sm btn-outline-danger shadow-sm">
                                                     <i class="fas fa-trash-alt"></i> Kaldır
                                                 </button>
                                             </div>
@@ -50,37 +57,59 @@
                                 </div>`;
                         });
                     }
-                    
+
                     $("#favoritesContainer").html(html);
                 },
                 error: function(xhr) {
-                    $("#favoritesContainer").html('<div class="col-12 text-center text-danger"><h5>Favoriler yüklenirken bir hata oluştu.</h5></div>');
+                    $("#favoritesContainer").html('<div class="col-12 text-center text-danger py-5"><h5>Favoriler yüklenirken bir hata oluştu.</h5></div>');
+                    Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon: 'error', title: 'Hata', text: 'Favoriler yüklenemedi.' });
                 }
             });
         });
 
         function removeFromFavorites(favoriteId) {
-            if (confirm("Bu ilanı favorilerinizden çıkarmak istediğinize emin misiniz?")) {
-                $.ajax({
-                    url: apiBaseUrl + "/Favorites/" + favoriteId, 
-                    type: "DELETE",
-                    headers: {
-                        "Authorization": "Bearer " + token
-                    },
-                    success: function () {
-                        $(`#fav-row-${favoriteId}`).fadeOut(500, function() {
-                            $(this).remove();
-                            
-                            if ($("#favoritesContainer").children().length === 0) {
-                                $("#favoritesContainer").html('<div class="col-12 text-center py-5"><i class="far fa-heart fa-3x text-muted mb-3"></i><h5>Henüz favori ilanınız yok.</h5></div>');
-                            }
-                        });
-                    },
-                    error: function (xhr) {
-                        alert("Silme işlemi başarısız: " + xhr.responseText);
-                    }
-                });
-            }
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu ilanı favorilerinizden çıkarmak istiyor musunuz?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> Evet, Çıkar',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: apiBaseUrl + "/Favorites/" + favoriteId,
+                        type: "DELETE",
+                        headers: {
+                            "Authorization": "Bearer " + token
+                        },
+                        success: function () {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                icon: 'success',
+                                title: 'Başarılı!',
+                                text: 'İlan favorilerden çıkarıldı.'
+                            });
+
+                            $(`#fav-row-${favoriteId}`).fadeOut(500, function() {
+                                $(this).remove();
+
+                                if ($("#favoritesContainer").children().length === 0) {
+                                    $("#favoritesContainer").html('<div class="col-12 text-center py-5"><i class="far fa-heart fa-3x text-muted mb-3"></i><h5>Henüz favori ilanınız yok.</h5></div>');
+                                }
+                            });
+                        },
+                        error: function (xhr) {
+                            Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon: 'error', title: 'İşlem Başarısız', text: 'Kaldırma işlemi başarısız oldu.' });
+                        }
+                    });
+                }
+            });
         }
     </script>
 }
