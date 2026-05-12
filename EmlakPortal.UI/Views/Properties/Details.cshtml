@@ -43,25 +43,25 @@
                 type: "GET",
                 success: function (data) {
                     propertyOwnerId = data.appUserId;
-
                     renderDetails(data);
                 },
                 error: function () {
-                    $("#detailContainer").html(`<div class="alert alert-danger text-center"><h4><i class="fas fa-exclamation-triangle"></i> İlan bulunamadı.</h4></div>`);
+                    $("#detailContainer").html(`<div class="alert alert-danger text-center shadow-sm"><h4><i class="fas fa-exclamation-triangle"></i> İlan bulunamadı veya silinmiş olabilir.</h4></div>`);
                 }
             });
         });
 
         function renderDetails(item) {
-             const imageUrl = (item.imageUrl && item.imageUrl.length > 5) ? item.imageUrl : "/images/default.png";
-
+        const imageUrl = (item.imageUrl && item.imageUrl.length > 5)
+                         ? "http://localhost:5155" + item.imageUrl
+                         : "/images/default.png";
              let catName = item.categoryName || "Kategorisiz";
-             let badgeColor = "badge-secondary"; 
+             let badgeColor = "badge-secondary";
 
              if (catName.toLowerCase().includes("satılık")) {
-                 badgeColor = "badge-danger"; 
+                 badgeColor = "badge-danger";
              } else if (catName.toLowerCase().includes("kiralık")) {
-                 badgeColor = "badge-success"; 
+                 badgeColor = "badge-success";
              }
 
              const html = `
@@ -71,8 +71,16 @@
                              <img src="${imageUrl}" class="card-img-top rounded-top" alt="${item.title}" style="max-height: 500px; object-fit: cover;">
                              <div class="card-body p-4">
                                  <h2 class="font-weight-bold text-dark">${item.title}</h2>
-                                 <p class="text-muted"><i class="fas fa-map-marker-alt text-danger"></i> ${item.cityName || 'Şehir'} / ${item.districtName || 'İlçe'}</p>
 
+                                 <p class="text-muted" style="font-size: 1.1rem;">
+                                     <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                                     <strong>Konum:</strong> ${item.cityName || 'Şehir Belirtilmemiş'} / ${item.districtName || 'İlçe Belirtilmemiş'}
+                                 </p>
+
+                                 <p class="text-muted" style="font-size: 1.1rem;">
+                                     <i class="fas fa-map-signs text-danger mr-1"></i>
+                                     <strong>Açık Adres:</strong> <span>${item.address || 'Adres bilgisi girilmemiş.'}</span>
+                                 </p>
                                  <hr>
 
                                  <h4 class="font-weight-bold mt-4 mb-3">İlan Açıklaması</h4>
@@ -131,38 +139,34 @@
 
         function addToFavorites() {
              if (!token) {
-                 alert("Favorilere eklemek için önce giriş yapmalısınız.");
-                 window.location.href = "/Auth/Login";
+                 Toast.fire({ icon: 'warning', title: 'Uyarı', text: 'Favorilere eklemek için önce giriş yapmalısınız.' });
+                 setTimeout(() => { window.location.href = "/Auth/Login"; }, 1500);
                  return;
              }
 
-             const favoriteData = {
-                 PropertyId: parseInt(propertyId)
-             };
+             const favoriteData = { PropertyId: parseInt(propertyId) };
 
              $.ajax({
                  url: apiBaseUrl + "/Favorites",
                  type: "POST",
                  contentType: "application/json",
                  data: JSON.stringify(favoriteData),
-                 headers: {
-                     "Authorization": "Bearer " + token
-                 },
+                 headers: { "Authorization": "Bearer " + token },
                  success: function () {
-                     alert("İlan favorilerinize eklendi!");
+                     Toast.fire({ icon: 'success', title: 'Harika!', text: 'İlan favorilerinize eklendi.' });
                      $("#btnFavorite").removeClass("btn-outline-danger").addClass("btn-danger text-white").html('<i class="fas fa-heart"></i> Favorilerinizde');
                  },
                  error: function (xhr) {
-                     alert("Hata: " + xhr.responseText);
+                     Toast.fire({ icon: 'info', title: 'Bilgi', text: 'Bu ilan zaten favorilerinizde olabilir.' });
                  }
              });
          }
 
         function submitMessage() {
              if (!token) {
-                 alert("Mesaj göndermek için lütfen önce giriş yapın.");
                  $('#messageModal').modal('hide');
-                 window.location.href = "/Auth/Login";
+                 Toast.fire({ icon: 'warning', title: 'Uyarı', text: 'Mesaj göndermek için lütfen önce giriş yapın.' });
+                 setTimeout(() => { window.location.href = "/Auth/Login"; }, 1500);
                  return;
              }
 
@@ -173,7 +177,7 @@
              };
 
              if (messageData.Text === "") {
-                 alert("Lütfen boş mesaj göndermeyin.");
+                 Toast.fire({ icon: 'warning', title: 'Eksik Bilgi', text: 'Lütfen boş mesaj göndermeyin.' });
                  return;
              }
 
@@ -184,12 +188,12 @@
                  data: JSON.stringify(messageData),
                  headers: { "Authorization": "Bearer " + token },
                  success: function() {
-                     alert("Mesajınız başarıyla satıcıya iletildi!");
                      $('#messageModal').modal('hide');
                      $("#msgContent").val("");
+                     Toast.fire({ icon: 'success', title: 'Başarılı!', text: 'Mesajınız satıcıya iletildi.' });
                  },
                  error: function(xhr) {
-                     alert("Mesaj gönderilemedi: " + xhr.responseText);
+                     Toast.fire({ icon: 'error', title: 'Hata', text: 'Mesaj gönderilemedi.' });
                  }
              });
          }

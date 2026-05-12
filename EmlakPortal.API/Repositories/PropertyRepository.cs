@@ -17,7 +17,9 @@ namespace EmlakPortal.API.Repositories
         {
             return await _context.Properties
                 .Include(p => p.Category) 
-                .Include(p => p.AppUser)  
+                .Include(p => p.AppUser)
+                .Include(p => p.City)
+        .Include(p => p.District)
                 .ToListAsync();
         }
 
@@ -26,6 +28,7 @@ namespace EmlakPortal.API.Repositories
             return await _context.Set<Property>()
                                  .Include(x => x.Category)
                                  .Include(x => x.City)
+                                 .Include(p => p.District)
                                  .ToListAsync();
         }
     }

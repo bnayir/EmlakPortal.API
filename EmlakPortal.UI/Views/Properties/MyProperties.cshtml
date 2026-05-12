@@ -40,44 +40,79 @@
                     },
                     success: function (data) {
                         var html = "";
-                        $.each(data, function (index, item) {
-                            html += `<tr>
-                                        <td>${item.title}</td>
-                                        <td><span class="badge badge-success">${item.statusName}</span></td>
-                                        <td>
-                                        <a href="/Properties/Edit/${item.propertyId}" class="btn btn-warning btn-sm mr-2">
-                                                <i class="fas fa-edit"></i> Düzenle
-                                            </a>
-                                            <button onclick="deleteProperty(${item.propertyId})" class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash"></i> Sil
-                                            </button>
-                                        </td>
-                                    </tr>`;
-                        });
+
+                        if (!data || data.length === 0) {
+                             html = `<tr><td colspan="3" class="text-center text-muted py-4">Henüz eklediğiniz bir ilan bulunmuyor.</td></tr>`;
+                        } else {
+                            $.each(data, function (index, item) {
+                                html += `<tr>
+                                            <td class="align-middle font-weight-bold">${item.title}</td>
+                                            <td class="align-middle"><span class="badge badge-success px-2 py-1">${item.statusName}</span></td>
+                                            <td class="align-middle">
+                                                <a href="/Properties/Edit/${item.propertyId}" class="btn btn-warning btn-sm mr-2 shadow-sm">
+                                                    <i class="fas fa-edit"></i> Düzenle
+                                                </a>
+                                                <button onclick="deleteProperty(${item.propertyId})" class="btn btn-danger btn-sm shadow-sm">
+                                                    <i class="fas fa-trash"></i> Sil
+                                                </button>
+                                            </td>
+                                        </tr>`;
+                            });
+                        }
                         $("#myPropertiesList").html(html);
                     },
                     error: function() {
-                        alert("İlanlarınız yüklenirken bir hata oluştu.");
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: 'İlanlarınız yüklenirken bir hata oluştu.'
+                        });
                     }
                 });
             }
         });
 
         function deleteProperty(id) {
-            if (confirm("Bu ilanı silmek istediğinize emin misiniz?")) {
-                var token = localStorage.getItem("token");
-                $.ajax({
-                    url: "http://localhost:5155/api/Properties/" + id,
-                    type: "DELETE",
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", "Bearer " + token);
-                    },
-                    success: function () {
-                        alert("İlan başarıyla silindi.");
-                        location.reload();
-                    }
-                });
-            }
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu ilanı sildiğinizde geri alamazsınız!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#858796',
+                confirmButtonText: '<i class="fas fa-trash"></i> Evet, Sil!',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var token = localStorage.getItem("token");
+
+                    $.ajax({
+                        url: "http://localhost:5155/api/Properties/" + id,
+                        type: "DELETE",
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("Authorization", "Bearer " + token);
+                        },
+                        success: function () {
+                            Swal.fire(
+                                'Silindi!',
+                                'İlanınız başarıyla kaldırıldı.',
+                                'success'
+                            );
+
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
+                        },
+                        error: function () {
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'İşlem Başarısız',
+                                text: 'İlan silinirken bir sorun oluştu.'
+                            });
+                        }
+                    });
+                }
+            });
         }
     </script>
 }

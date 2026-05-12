@@ -67,18 +67,14 @@
                 <label class="form-label fw-bold text-muted small">Şehir</label>
                 <select class="form-select bg-light" id="citySelect">
                     <option value="">Tüm Şehirler</option>
-                    <option value="1">Antalya</option>
-                    <option value="34">İstanbul</option>
-                    <option value="6">Ankara</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold text-muted small">Kategori</label>
                 <select class="form-select bg-light" id="categorySelect">
                     <option value="">Tüm Kategoriler</option>
-                    <option value="1">Konut</option>
-                    <option value="2">İşyeri</option>
-                    <option value="3">Arsa</option>
+                    <option value="1">Kiralık</option>
+                    <option value="2">Satılık</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -112,7 +108,26 @@
 
         $(document).ready(function () {
             fetchProperties();
+            loadFilterCities(); 
         });
+
+        function loadFilterCities() {
+            $.ajax({
+                url: apiBaseUrl + "/Cities",
+                type: "GET",
+                success: function (data) {
+                    const citySelect = $("#citySelect");
+                    citySelect.empty().append('<option value="">Tüm Şehirler</option>');
+
+                    $.each(data, function (index, city) {
+                        citySelect.append(`<option value="${city.cityId}">${city.cityName}</option>`);
+                    });
+                },
+                error: function (xhr) {
+                    console.error("Şehirler yüklenemedi:", xhr);
+                }
+            });
+        }
 
         function fetchProperties() {
             showLoading();
@@ -125,6 +140,12 @@
                 },
                 error: function () {
                     showError("İlanlar yüklenirken sunucu ile bağlantı kurulamadı.");
+
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Bağlantı Hatası',
+                        text: 'İlanlar şu an getirilemiyor.'
+                    });
                 }
             });
         }
@@ -152,12 +173,36 @@
                 type: "GET",
                 success: function (data) {
                     renderListings(data);
+
+                    if (data && data.length > 0) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Arama Tamamlandı',
+                            text: `${data.length} adet ilan listelendi.`
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: 'info',
+                            title: 'Sonuç Bulunamadı',
+                            text: 'Farklı kriterler denemeye ne dersiniz?'
+                        });
+                    }
                 },
                 error: function (xhr) {
                     if(xhr.status === 404){
-                        renderListings([]); 
+                        renderListings([]);
+                        Toast.fire({
+                            icon: 'info',
+                            title: 'Eşleşme Yok',
+                            text: 'Aradığınız kriterlerde ilan bulunmuyor.'
+                        });
                     } else {
                         showError("Arama yapılırken bir hata oluştu.");
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: 'Arama işlemi gerçekleştirilemedi.'
+                        });
                     }
                 }
             });
@@ -184,7 +229,10 @@
             $("#resultCount").text(`${data.length} İlan Bulundu`);
 
             data.forEach(item => {
-        const imageUrl = item.imageUrl ? item.imageUrl : "/images/default.png";
+                const imageUrl = (item.imageUrl && item.imageUrl.length > 5)
+                                 ? "http://localhost:5155" + item.imageUrl
+                                 : "/images/default.png";
+
                 const cardHtml = `
                     <div class="col-lg-4 col-md-6">
                         <div class="card h-100 border-0 shadow-sm property-card">

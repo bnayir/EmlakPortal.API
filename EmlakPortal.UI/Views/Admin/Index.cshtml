@@ -121,8 +121,19 @@
 
             function loadDatabaseDashboard() {
                 var token = localStorage.getItem("token");
+
+                if (!token) {
+                    Toast.fire({
+                        icon: 'warning',
+                        title: 'Oturum Bulunamadı',
+                        text: 'Lütfen tekrar giriş yapın.'
+                    });
+                    setTimeout(() => { window.location.href = "/Auth/Login"; }, 2000);
+                    return;
+                }
+
                 $.ajax({
-                    url: "http://localhost:5155/api/Properties/MyProperties", 
+                    url: "http://localhost:5155/api/Properties/MyProperties",
                     type: "GET",
                     beforeSend: function (xhr) { xhr.setRequestHeader("Authorization", "Bearer " + token); },
                     success: function (data) {
@@ -130,8 +141,20 @@
                             $("#chartArea").addClass("d-none");
                             $("#noDataMessage").removeClass("d-none");
                             $("#recentProperties").html('<tr><td colspan="4" class="text-center">Gösterilecek ilan bulunamadı.</td></tr>');
+
+                            Toast.fire({
+                                icon: 'info',
+                                title: 'Henüz ilanınız yok',
+                                text: 'İstatistikleri görmek için yeni bir ilan ekleyin.'
+                            });
                             return;
                         }
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Dashboard Güncellendi',
+                            text: 'Verileriniz başarıyla yüklendi.'
+                        });
 
                         $("#totalCount").text(data.length);
 
@@ -143,24 +166,24 @@
                         $("#cityCount").text(cities.length);
 
                         let tableRows = "";
-                                data.slice(0, 5).forEach(p => {
-            let badgeColor = (p.categoryName && p.categoryName.toLowerCase().includes("satılık")) ? "badge-danger" : "badge-success";
+                        data.slice(0, 5).forEach(p => {
+                            let badgeColor = (p.categoryName && p.categoryName.toLowerCase().includes("satılık")) ? "badge-danger" : "badge-success";
 
-            tableRows += `<tr>
-                <td>
-                    <div class="font-weight-bold text-dark" style="font-size: 1.1rem;">${p.title}</div>
-                    <span class="badge ${badgeColor} px-2 py-1 mt-1 shadow-sm"><i class="fas fa-tag"></i> ${p.categoryName || 'Bilinmiyor'}</span>
-                    <span class="badge badge-secondary px-2 py-1 mt-1 shadow-sm"><i class="fas fa-home"></i> ${p.propertyType || 'Ev'}</span>
-                </td>
-                <td class="text-success font-weight-bold align-middle">${parseFloat(p.price).toLocaleString('tr-TR')} TL</td>
-                <td class="align-middle"><i class="fas fa-map-pin text-muted mr-1"></i> ${p.cityName || 'Bilinmiyor'}</td>
-                <td class="align-middle">
-                    <a href="/Properties/Details/${p.propertyId}" class="btn btn-sm btn-primary btn-circle shadow-sm" title="İlan Detayına Git">
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </td>
-            </tr>`;
-        });
+                            tableRows += `<tr>
+                                <td>
+                                    <div class="font-weight-bold text-dark" style="font-size: 1.1rem;">${p.title}</div>
+                                    <span class="badge ${badgeColor} px-2 py-1 mt-1 shadow-sm"><i class="fas fa-tag"></i> ${p.categoryName || 'Bilinmiyor'}</span>
+                                    <span class="badge badge-secondary px-2 py-1 mt-1 shadow-sm"><i class="fas fa-home"></i> ${p.propertyType || 'Ev'}</span>
+                                </td>
+                                <td class="text-success font-weight-bold align-middle">${parseFloat(p.price).toLocaleString('tr-TR')} TL</td>
+                                <td class="align-middle"><i class="fas fa-map-pin text-muted mr-1"></i> ${p.cityName || 'Bilinmiyor'}</td>
+                                <td class="align-middle">
+                                    <a href="/Properties/Details/${p.propertyId}" class="btn btn-sm btn-primary btn-circle shadow-sm" title="İlan Detayına Git">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </td>
+                            </tr>`;
+                        });
                         $("#recentProperties").html(tableRows);
 
                         const categoryStats = {};
@@ -170,6 +193,15 @@
                         });
 
                         drawDynamicChart(Object.keys(categoryStats), Object.values(categoryStats));
+                    },
+                    error: function (xhr) {
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Veriler Çekilemedi',
+                            text: 'Sunucuyla bağlantı kurulamadı.'
+                        });
+
+                        $("#recentProperties").html('<tr><td colspan="4" class="text-center text-danger">Hata: Veriler yüklenemedi.</td></tr>');
                     }
                 });
             }

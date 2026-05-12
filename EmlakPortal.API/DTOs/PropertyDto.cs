@@ -22,6 +22,7 @@
         public int CategoryId { get; set; }
         public int CityId { get; set; }
         public int DistrictId { get; set; }
-        public string AppUserId { get; set; } 
+        public string AppUserId { get; set; }
+        public string Address { get; set; }
     }
 }

@@ -10,7 +10,7 @@
         public int DistrictId { get; set; }
         public int CategoryId { get; set; }
         public int SquareMeter { get; set; }
-
+        public string Address { get; set; } 
         public string RoomCount { get; set; }
         public string PropertyType { get; set; }
         public string FloorsCount { get; set; }

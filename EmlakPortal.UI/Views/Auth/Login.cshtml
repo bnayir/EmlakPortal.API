@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = null; 
+    Layout = null;
 }
 <!DOCTYPE html>
 <html lang="tr">
@@ -7,6 +7,7 @@
     <title>Giriş Yap - Emlak Portalı</title>
     <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="~/css/sb-admin-2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gradient-primary">
     <div class="container">
@@ -40,6 +41,14 @@
 
     <script src="~/vendor/jquery/jquery.min.js"></script>
     <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+
         $("#loginForm").submit(function (e) {
             e.preventDefault();
             var loginData = {
@@ -54,11 +63,23 @@
                 data: JSON.stringify(loginData),
                 success: function (response) {
                     localStorage.setItem("token", response.token);
-                    alert("Giriş başarılı! Panale yönlendiriliyorsunuz.");
-                    window.location.href = "/Home/Index";
+
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Giriş Başarılı!',
+                        text: 'Panele yönlendiriliyorsunuz...'
+                    });
+
+                    setTimeout(function() {
+                        window.location.href = "/Home/Index";
+                    }, 1500);
                 },
                 error: function () {
-                    alert("Kullanıcı adı veya şifre hatalı!");
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Giriş Başarısız',
+                        text: 'Kullanıcı adı veya şifre hatalı!'
+                    });
                 }
             });
         });

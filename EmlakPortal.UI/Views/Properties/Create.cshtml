@@ -80,6 +80,21 @@
                                         <option value="3">Konyaaltı</option>
                                     </select>
                                 </div>
+                            </div><div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Şehir</label>
+                                    <select class="form-control" id="city">
+                                        <option value="">Şehir Seçiniz</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">İlçe</label>
+                                    <select class="form-control" id="district">
+                                        <option value="">Önce Şehir Seçiniz</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -125,7 +140,14 @@
                                 </div>
                             </div>
                         </div>
-
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Açık Adres</label>
+                                    <textarea class="form-control" id="address" rows="2" placeholder="Mahalle, Sokak, No, Daire bilgilerini yazınız..." required></textarea>
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label class="font-weight-bold">Açıklama</label>
                             <textarea class="form-control" id="description" rows="5"></textarea>
@@ -166,31 +188,28 @@
         const apiBaseUrl = "http://localhost:5155/api";
 
         $(document).ready(function () {
+            loadCities();
 
             function loadCities() {
                 $.ajax({
                     url: apiBaseUrl + "/Cities",
                     type: "GET",
                     success: function (data) {
-                        const citySelect = $("#city"); 
+                        const citySelect = $("#city");
                         citySelect.empty().append('<option value="">Şehir Seçiniz</option>');
-
                         $.each(data, function (index, city) {
                             citySelect.append(`<option value="${city.cityId}">${city.cityName}</option>`);
                         });
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         console.error("Şehirler yüklenirken hata oluştu:", xhr);
                     }
                 });
             }
 
-            loadCities();
-
             $("#city").change(function () {
                 const cityId = $(this).val();
-                const districtSelect = $("#district"); 
-
+                const districtSelect = $("#district");
                 districtSelect.empty().append('<option value="">İlçeler yükleniyor...</option>');
 
                 if (cityId) {
@@ -199,14 +218,9 @@
                         type: "GET",
                         success: function (data) {
                             districtSelect.empty().append('<option value="">İlçe Seçiniz</option>');
-
                             $.each(data, function (index, item) {
                                 districtSelect.append(`<option value="${item.districtId}">${item.districtName}</option>`);
                             });
-                        },
-                        error: function (xhr) {
-                            console.error("İlçeler getirilemedi:", xhr);
-                            districtSelect.empty().append('<option value="">İlçeler bulunamadı</option>');
                         }
                     });
                 } else {
@@ -216,6 +230,72 @@
 
             $("#propertyForm").on("submit", function (e) {
                 e.preventDefault();
+
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    Toast.fire({ icon: 'error', title: 'Hata: Giriş biletiniz bulunamadı!' });
+                    window.location.href = "/Auth/Login";
+                    return;
+                }
+
+                const propertyData = {
+                "Title": $("#title").val().trim(),
+                "Description": $("#description").val().trim(),
+                "Price": parseFloat($("#price").val()),
+                "Address": $("#address").val().trim(),
+                "CityId": parseInt($("#city").val()),
+                "DistrictId": parseInt($("#district").val()),
+                "CategoryId": parseInt($("#category").val()),
+                "SquareMeter": parseInt($("#squareMeter").val()),
+
+                "RoomCount": $("#roomCount").val(),
+                "PropertyType": $("#propertyType").val(),
+                "FloorsCount": $("#floorsCount").val(),
+                "FloorLocation": $("#floorLocation").val(),
+                "Heating": $("#heating").val(),
+
+                "ImageUrl": "default.png"
+            };
+
+                $.ajax({
+                    url: apiBaseUrl + "/Properties",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(propertyData),
+                    headers: { "Authorization": "Bearer " + token },
+                    success: function (response) {
+                        const newPropertyId = response.propertyId;
+                        const fileInput = document.getElementById("imageFile");
+
+                        if (fileInput.files.length > 0) {
+                            const formData = new FormData();
+                            formData.append("file", fileInput.files[0]);
+
+                            $.ajax({
+                                url: apiBaseUrl + "/Properties/UploadImage/" + newPropertyId,
+                                type: "POST",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                headers: { "Authorization": "Bearer " + token },
+                                success: function () {
+                                    Toast.fire({ icon: 'success', title: 'İlan ve resim başarıyla yüklendi!' });
+                                    setTimeout(() => { window.location.href = "/Admin/Index"; }, 2000);
+                                },
+                                error: function () {
+                                    Toast.fire({ icon: 'warning', title: 'İlan eklendi ama resim yüklenemedi.' });
+                                    setTimeout(() => { window.location.href = "/Admin/Index"; }, 2000);
+                                }
+                            });
+                        } else {
+                            Toast.fire({ icon: 'success', title: 'İlan başarıyla eklendi!' });
+                            setTimeout(() => { window.location.href = "/Admin/Index"; }, 2000);
+                        }
+                    },
+                    error: function (xhr) {
+                        Toast.fire({ icon: 'error', title: 'Hata!', text: xhr.responseText || 'İlan kaydedilemedi.' });
+                    }
+                });
             });
         });
     </script>
