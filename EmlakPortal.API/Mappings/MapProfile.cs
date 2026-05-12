@@ -14,12 +14,11 @@ namespace EmlakPortal.API.Mappings
                 .ForMember(dest => dest.DistrictName, opt => opt.MapFrom(src => src.District.DistrictName))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName)); CreateMap<PropertyCreateDto, Property>();
 
-            CreateMap<Property, PropertyUpdateDto>().ReverseMap();
+            CreateMap<PropertyUpdateDto, Property>();
 
 
-           
 
-             CreateMap<Category, CategoryCreateDto>().ReverseMap();
+            CreateMap<Category, CategoryCreateDto>().ReverseMap();
 
             CreateMap<City, CityDto>().ReverseMap();
 

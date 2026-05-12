@@ -137,9 +137,13 @@
              $("#detailContainer").html(html);
          }
 
-               function addToFavorites() {
+        function addToFavorites() {
             if (!token) {
-                Toast.fire({
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
                     icon: 'warning',
                     title: 'Oturum Gerekli',
                     text: 'Favorilere eklemek için önce giriş yapmalısınız.'
@@ -161,10 +165,14 @@
                     "Authorization": "Bearer " + token
                 },
                 success: function () {
-                    Toast.fire({
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
                         icon: 'success',
-                        title: 'Favorilere Eklendi!',
-                        text: 'Bu ilanı artık favorilerim sayfasında görebilirsiniz.'
+                        title: 'Harika!',
+                        text: 'İlan favorilerinize eklendi.'
                     });
 
                     $("#btnFavorite")
@@ -173,7 +181,11 @@
                         .html('<i class="fas fa-heart"></i> Favorilerinizde');
                 },
                 error: function (xhr) {
-                    Toast.fire({
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
                         icon: 'info',
                         title: 'Bilgi',
                         text: 'Bu ilan zaten favori listenizde bulunuyor.'
