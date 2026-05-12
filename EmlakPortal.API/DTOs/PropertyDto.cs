@@ -19,6 +19,9 @@
         public string CityName { get; set; }
         public string DistrictName { get; set; }
         public string CategoryName { get; set; }
+        public int CategoryId { get; set; }
+        public int CityId { get; set; }
+        public int DistrictId { get; set; }
         public string AppUserId { get; set; } 
     }
 }
