@@ -160,94 +160,62 @@
         </div>
     </div>
 </div>
-
+                }
 @section Scripts {
     <script>
         const apiBaseUrl = "http://localhost:5155/api";
 
-        $("#propertyForm").on("submit", function (e) {
-            e.preventDefault();
+        $(document).ready(function () {
 
-            const propertyData = {
-                "Title": $("#title").val().trim(),
-                "Description": $("#description").val().trim(),
-                "Price": parseFloat($("#price").val()),
-
-                "CityId": parseInt($("#city").val()),
-                "DistrictId": parseInt($("#district").val()),
-                "CategoryId": parseInt($("#category").val()),
-                "SquareMeter": parseInt($("#squareMeter").val()),
-
-                "RoomCount": $("#roomCount").val(),
-                "PropertyType": $("#propertyType").val(),
-                "FloorsCount": $("#floorsCount").val(),
-                "FloorLocation": $("#floorLocation").val(),
-                "Heating": $("#heating").val(),
-
-                "ImageUrl": "default.png"
-            };
-
-            console.log("Gönderilen Veri:", propertyData);
-
-            const token = localStorage.getItem("token");
-            console.log("Cebimdeki Bilet:", token);
-
-            if (!token) {
-                alert("Güvenlik hatası: Giriş biletiniz bulunamadı. Lütfen tekrar giriş yapın.");
-                window.location.href = "/Auth/Login";
-                return; 
-            }
-
-            $.ajax({
-                url: apiBaseUrl + "/Properties",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(propertyData),
-                headers: {
-                    "Authorization": "Bearer " + token
-                },
-                       success: function (response) {
-            const newPropertyId = response.propertyId;
-
-            const fileInput = document.getElementById("imageFile");
-
-            if (fileInput.files.length > 0) {
-                const formData = new FormData();
-                formData.append("file", fileInput.files[0]); 
-
+            function loadCities() {
                 $.ajax({
-                    url: apiBaseUrl + "/Properties/UploadImage/" + newPropertyId,
-                    type: "POST",
-                    data: formData,
-                    processData: false, 
-                    contentType: false, 
-                    headers: {
-                        "Authorization": "Bearer " + token
+                    url: apiBaseUrl + "/Cities",
+                    type: "GET",
+                    success: function (data) {
+                        const citySelect = $("#city"); 
+                        citySelect.empty().append('<option value="">Şehir Seçiniz</option>');
+
+                        $.each(data, function (index, city) {
+                            citySelect.append(`<option value="${city.cityId}">${city.cityName}</option>`);
+                        });
                     },
-                    success: function (imageResponse) {
-                        alert("Tebrikler! İlanınız ve resmi başarıyla yüklendi.");
-                        window.location.href = "/Admin/Index";
-                    },
-                    error: function (xhr) {
-                        alert("İlan eklendi ama resim yüklenirken bir sorun oluştu.");
-                        console.log(xhr);
-                        window.location.href = "/Admin/Index";
+                    error: function(xhr) {
+                        console.error("Şehirler yüklenirken hata oluştu:", xhr);
                     }
                 });
-            } else {
-                alert("Tebrikler! İlanınız (resimsiz olarak) başarıyla eklendi.");
-                window.location.href = "/Admin/Index";
             }
-        },
-                error: function (xhr) {
-                    console.log("Tam Hata Raporu:", xhr);
 
-                    if (xhr.status === 401) {
-                        alert("Hata (401): Yetkisiz giriş! Token geçersiz veya süresi dolmuş olabilir.");
-                    } else {
-                        alert("API Hatası: " + xhr.responseText);
-                    }
+            loadCities();
+
+            $("#city").change(function () {
+                const cityId = $(this).val();
+                const districtSelect = $("#district"); 
+
+                districtSelect.empty().append('<option value="">İlçeler yükleniyor...</option>');
+
+                if (cityId) {
+                    $.ajax({
+                        url: apiBaseUrl + "/Districts/GetByCity/" + cityId,
+                        type: "GET",
+                        success: function (data) {
+                            districtSelect.empty().append('<option value="">İlçe Seçiniz</option>');
+
+                            $.each(data, function (index, item) {
+                                districtSelect.append(`<option value="${item.districtId}">${item.districtName}</option>`);
+                            });
+                        },
+                        error: function (xhr) {
+                            console.error("İlçeler getirilemedi:", xhr);
+                            districtSelect.empty().append('<option value="">İlçeler bulunamadı</option>');
+                        }
+                    });
+                } else {
+                    districtSelect.empty().append('<option value="">Önce Şehir Seçiniz</option>');
                 }
+            });
+
+            $("#propertyForm").on("submit", function (e) {
+                e.preventDefault();
             });
         });
     </script>

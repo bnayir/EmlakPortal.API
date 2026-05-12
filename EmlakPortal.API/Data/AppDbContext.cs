@@ -16,7 +16,8 @@ namespace EmlakPortal.API.Data
         public DbSet<Favorite> Favorites { get; set; }
 
         public DbSet<Message> Messages { get; set; }
-
+        public DbSet<City> City { get; set; }
+        public DbSet<District> District { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,13 +59,11 @@ namespace EmlakPortal.API.Data
 
             // 1. Kategorileri Tohumla
             modelBuilder.Entity<Category>().HasData(
-                new Category { CategoryId = 1, CategoryName = "Konut" },
-                new Category { CategoryId = 2, CategoryName = "İşyeri" },
-                new Category { CategoryId = 3, CategoryName = "Arsa" },
-                new Category { CategoryId = 4, CategoryName = "Villa" }
+                new Category { CategoryId = 1, CategoryName = "Kiralık" },
+                new Category { CategoryId = 2, CategoryName = "Satılık" }
             );
 
-            // 2. Şehirleri Tohumla
+            /* 2. Şehirleri Tohumla
             modelBuilder.Entity<City>().HasData(
                 new City { CityId = 1, CityName = "İstanbul" },
                 new City { CityId = 2, CityName = "Ankara" },
@@ -77,7 +76,7 @@ namespace EmlakPortal.API.Data
                 new District { DistrictId = 2, CityId = 1, DistrictName = "Beşiktaş" },
                 new District { DistrictId = 3, CityId = 3, DistrictName = "Muratpaşa" },
                 new District { DistrictId = 4, CityId = 3, DistrictName = "Konyaaltı" }
-            );
+            );*/
 
 
         }
